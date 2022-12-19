@@ -52,11 +52,11 @@ MIDDLEWARE = [
 ]
 
 JAZZMIN_SETTINGS = {
-    "site_title": "Helmet Yovie",
-    "site_brand": "Helmet Yovie",
-    "site_header": "Helmet Yovie",
+    "site_title": "PRITOHELMET",
+    "site_brand": "PRITOHELMET",
+    "site_header": "PRITOHELMET",
     "site_logo": "img/WebsiteLogo.png",
-    "copyright": "Helmet Yovie",
+    "copyright": "PRITOHELMET",
     "topmenu_links": [
 
             # Url that gets reversed (Permissions can be added)
