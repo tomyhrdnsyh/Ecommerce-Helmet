@@ -55,15 +55,12 @@ JAZZMIN_SETTINGS = {
     "site_title": "Helmet Yovie",
     "site_brand": "Helmet Yovie",
     "site_header": "Helmet Yovie",
-    "site_logo": "img/logo.jpg",
+    "site_logo": "img/WebsiteLogo.png",
     "copyright": "Helmet Yovie",
     "topmenu_links": [
 
             # Url that gets reversed (Permissions can be added)
             {"name": "Halaman Utama",  "url": "/", "permissions": ["auth.view_user"]},
-
-            # external url that opens in a new window (Permissions can be added)
-            # {"name": "Support", "url": "https://github.com/tomyhrdnsyh", "new_window": True},
 
             # model admin to link to (Permissions checked against model)
             # {"model": "auth.User"},
@@ -77,7 +74,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
