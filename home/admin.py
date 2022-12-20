@@ -30,20 +30,20 @@ class ProvinceAdmin(admin.ModelAdmin):
 
 @admin.register(Cities)
 class CitiesAdmin(admin.ModelAdmin):
-    list_display = ("city_id", "province_id", "city_name",
+    list_display = ("city_id", "province", "city_name",
                     "postal_code", "type")
 
 
 @admin.register(Shipment)
 class ShipmentAdmin(admin.ModelAdmin):
-    list_display = ("shipment_id", "user_id", "city_id",
+    list_display = ("shipment_id", "user", "city",
                     "courier")
 
 
 @admin.register(Products)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("product_id", "name", "price", "stock", "desc",
-                    "size_id", "brand_id", "category_id")
+                    "size", "brand", "category", "image")
 
 
 @admin.register(Categories)
@@ -68,7 +68,7 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ("cart_id", "product_id", "user_id", "unique_code", "status",
+    list_display = ("cart_id", "product", "user", "unique_code", "status",
                     "quantity", "date", "price_total")
 
 
@@ -80,11 +80,11 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ("payment_id", "order_id", "store",
+    list_display = ("payment_id", "order", "store",
                     "gross_amount", "payment_type")
 
 
 @admin.register(ProductPurchases)
 class ProductPurchasesAdmin(admin.ModelAdmin):
-    list_display = ("product_purchases_id", "user_id", "product_id",
+    list_display = ("product_purchases_id", "user", "product",
                     "supplier", "stock", "date", "status")

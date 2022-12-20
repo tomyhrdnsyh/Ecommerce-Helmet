@@ -113,7 +113,7 @@
                 <div class="col-lg-7 mt-5">
                     <div class="card">
                         <div class="card-body">
-                            <h1 class="h2">Active Wear</h1>
+                            <h1 class="h2">{{ name }}</h1>
                             <p class="h3 py-2">$25.00</p>
                             <p class="py-2">
                                 <i class="fa fa-star text-warning"></i>
@@ -162,10 +162,12 @@
                                             <li class="list-inline-item">Size :
                                                 <input type="hidden" name="product-size" id="product-size" value="S">
                                             </li>
-                                            <li class="list-inline-item"><span class="btn btn-success btn-size">S</span></li>
-                                            <li class="list-inline-item"><span class="btn btn-success btn-size">M</span></li>
-                                            <li class="list-inline-item"><span class="btn btn-success btn-size">L</span></li>
-                                            <li class="list-inline-item"><span class="btn btn-success btn-size">XL</span></li>
+                                            {% for item in available_size %}
+                                            <li class="list-inline-item">
+                                                <a href="/shop-single.html?name={{ name }}&size={{ item.size }}"><span>{{ item.size }}</span></a>
+                                            </li>
+<!--                                            <li class="list-inline-item"><a href="/shop-single.html?size={{ item.name }}" class="btn btn-success btn-size">{{ item.name }}</a></li>-->
+                                            {% endfor %}
                                         </ul>
                                     </div>
                                     <div class="col-auto">

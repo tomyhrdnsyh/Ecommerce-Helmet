@@ -1,7 +1,10 @@
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from .models import *
+from django.db.models import Q
 from django.shortcuts import redirect
+from collections import defaultdict
 
 
 # Create your views here.
@@ -20,10 +23,117 @@ def pages(request):
     if load_template == 'admin':
         return HttpResponseRedirect(reverse('admin:index'))
 
-    # ====== OTHER MENU ======
-    # if load_template == 'about.html':
-    #     return redirect('/about.html')
+    # ====== check if any search ======
+    if request.GET.get('q'):
+        list_product = send_product_shop(param=request.GET.get('q'))
+        context['list_product'] = list_product
+        load_template = 'shop.html'
+    # ====== end check ======
+
+    # ====== SHOP MENU ======
+
+    if load_template == 'shop.html':
+        # filtering
+        context['type'] = Categories.objects.values('name')
+        context['brands'] = Brands.objects.values('name')
+        size = {'S': 'Small', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
+        context['size'] = [{'code': item['name'], 'name': size[item['name']]} for item in Sizes.objects.values('name')]
+        context['size_categories'] = SizeCategories.objects.values('name')
+
+        if request.GET.get('type'):
+            list_product = send_product_shop(param=request.GET.get('type'), field='category__name')
+        elif request.GET.get('brand'):
+            list_product = send_product_shop(param=request.GET.get('brand'), field='brand__name')
+        elif request.GET.get('size'):
+            list_product = send_product_shop(param=request.GET.get('size'), field='size__name')
+        elif request.GET.get('size_categories'):
+            list_product = send_product_shop(param=request.GET.get('size_categories'),
+                                             field='size__size_category__name')
+        else:
+            list_product = send_product_shop()
+        context['list_product'] = list_product
+
+        # return redirect('/about.html')
+
+    # ====== END SHOP MENU ======
+
+    # ====== PRODUCT DETAIL ======
+    if load_template == 'shop-single.html':
+
+        if request.GET.get('name'):
+
+            # general
+            name_product = request.GET.get('name')
+            context['name'] = name_product
+
+            raw_detail = details_product(name_product)
+            context['available_size'] = [{'size': item} for key, value in raw_detail.items() for item in value.get('size')]
+            # context['price'] = [{'price': item['price']} for item in raw_detail]
+            print(raw_detail)
+
+            if request.GET.get('size'):
+                for item in raw_detail:
+                    if item.get('size__name') == request.GET.get('size'):
+                        print('ngentot', item)
+
+    # ====== END PRODUCT DETAIL ======
 
     context['segment'] = load_template
     html_template = loader.get_template(load_template)
     return HttpResponse(html_template.render(context, request))
+
+
+def send_product_shop(param=None, field=None):
+    # get data from model (database)
+    if param is not None and field is not None:
+
+        if field == 'category__name':
+            data_raw = Products.objects.filter(category__name=param).values('name', 'price', 'size__name', 'image')
+        elif field == 'brand__name':
+            data_raw = Products.objects.filter(brand__name=param).values('name', 'price', 'size__name', 'image')
+        elif field == 'size__name':
+            data_raw = Products.objects.filter(size__name=param).values('name', 'price', 'size__name', 'image')
+        elif field == 'size__size_category__name':
+            data_raw = Products.objects.filter(size__size_category__name=param).values('name', 'price', 'size__name',
+                                                                                       'image')
+
+    elif param is not None and field is None:
+        data_raw = Products.objects.filter(Q(name__icontains=param) |
+                                           Q(price__icontains=param) |
+                                           Q(desc__icontains=param) |
+                                           Q(size__size_category__name__icontains=param)).values('name', 'price',
+                                                                                                 'size__name', 'image')
+
+    else:
+        data_raw = Products.objects.values('name', 'price', 'size__name', 'image')
+
+    # preprocess data raw to clean
+    list_product = defaultdict(lambda: defaultdict(list))
+    for item in data_raw:
+        list_product[item['name']]['price'].append(int(item['price']))
+        list_product[item['name']]['size'].append(item['size__name'])
+        list_product[item['name']]['image'].append(item['image'])
+
+    # preprocess clean data for send to view
+    output = [{'name': key,
+               'price': f'{sorted(value.get("price"))[0]:,} s/d {sorted(value.get("price"))[-1]:,}' if len(
+                   value.get('price')) > 1 else f'{sorted(value.get("price"))[0]:,}',
+               'size': '/'.join(sorted(value.get('size'))),
+               'image': value.get('image')[0]} for key, value in list_product.items()]
+    return output
+
+
+def details_product(param):
+    raw_detail_product = Products.objects.filter(name=param).values('name', 'price', 'desc',
+                                                                    'size__name', 'category__name',
+                                                                    'brand__name', 'image')
+    # preprocess data raw to clean
+    list_product = defaultdict(lambda: defaultdict(list))
+    for item in raw_detail_product:
+        list_product[item['name']]['price'].append(int(item['price']))
+        list_product[item['name']]['desc'].append(item['desc'])
+        list_product[item['name']]['size'].append(item['size__name'])
+        list_product[item['name']]['category'].append(item['category__name'])
+        list_product[item['name']]['brand'].append(item['brand__name'])
+        list_product[item['name']]['image'].append(item['image'])
+    return list_product
