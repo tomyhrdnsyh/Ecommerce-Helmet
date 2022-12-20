@@ -98,7 +98,7 @@ class Products(models.Model):
     name = models.CharField(max_length=100)
     price = models.FloatField()
     stock = models.IntegerField()
-    # image = models.
+    image = models.ImageField(upload_to='files', null=True)
     desc = models.CharField(max_length=250)
 
     size_id = models.ForeignKey(Sizes, on_delete=models.CASCADE)
