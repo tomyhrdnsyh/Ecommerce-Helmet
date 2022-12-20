@@ -6,8 +6,9 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from collections import defaultdict
 
-
 # Create your views here.
+SIZE_DICT = {'S': 'Small', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
+
 
 def index(request):
     context = {}
@@ -25,7 +26,7 @@ def pages(request):
 
     # ====== check if any search ======
     if request.GET.get('q'):
-        list_product = send_product_shop(param=request.GET.get('q'))
+        list_product = query_get_product(param=request.GET.get('q'))
         context['list_product'] = list_product
         load_template = 'shop.html'
     # ====== end check ======
@@ -36,21 +37,21 @@ def pages(request):
         # filtering
         context['type'] = Categories.objects.values('name')
         context['brands'] = Brands.objects.values('name')
-        size = {'S': 'Small', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
-        context['size'] = [{'code': item['name'], 'name': size[item['name']]} for item in Sizes.objects.values('name')]
+        context['size'] = [{'code': item['name'], 'name': SIZE_DICT[item['name']]} for item in
+                           Sizes.objects.values('name')]
         context['size_categories'] = SizeCategories.objects.values('name')
 
         if request.GET.get('type'):
-            list_product = send_product_shop(param=request.GET.get('type'), field='category__name')
+            list_product = query_get_product(param=request.GET.get('type'), field='category__name')
         elif request.GET.get('brand'):
-            list_product = send_product_shop(param=request.GET.get('brand'), field='brand__name')
+            list_product = query_get_product(param=request.GET.get('brand'), field='brand__name')
         elif request.GET.get('size'):
-            list_product = send_product_shop(param=request.GET.get('size'), field='size__name')
+            list_product = query_get_product(param=request.GET.get('size'), field='size__name')
         elif request.GET.get('size_categories'):
-            list_product = send_product_shop(param=request.GET.get('size_categories'),
+            list_product = query_get_product(param=request.GET.get('size_categories'),
                                              field='size__size_category__name')
         else:
-            list_product = send_product_shop()
+            list_product = query_get_product()
         context['list_product'] = list_product
 
         # return redirect('/about.html')
@@ -62,20 +63,23 @@ def pages(request):
 
         if request.GET.get('name'):
 
-            # general
+            # General shop-single
             name_product = request.GET.get('name')
             context['name'] = name_product
 
             raw_detail = details_product(name_product)
-            context['available_size'] = [{'size': item} for key, value in raw_detail.items() for item in value.get('size')]
-            # context['price'] = [{'price': item['price']} for item in raw_detail]
-            print(raw_detail)
+            context.update(item_details_product(raw_detail))
+
+
+            # End general shop-single
 
             if request.GET.get('size'):
-                for item in raw_detail:
-                    if item.get('size__name') == request.GET.get('size'):
-                        print('ngentot', item)
-
+                for key, value in raw_detail.items():
+                    if request.GET.get('size') in value.get('size'):
+                        i = value.get('size').index(request.GET.get('size'))    # index of size
+                        raw_detail_filter_size = {key: {key: [value[i]] for key, value in value.items()}}
+                        context.update(item_details_product(raw_detail_filter_size))
+                        print(context)
     # ====== END PRODUCT DETAIL ======
 
     context['segment'] = load_template
@@ -83,7 +87,9 @@ def pages(request):
     return HttpResponse(html_template.render(context, request))
 
 
-def send_product_shop(param=None, field=None):
+# -------------------------- function preprocessing data --------------------------
+
+def query_get_product(param=None, field=None):
     # get data from model (database)
     if param is not None and field is not None:
 
@@ -124,16 +130,34 @@ def send_product_shop(param=None, field=None):
 
 
 def details_product(param):
-    raw_detail_product = Products.objects.filter(name=param).values('name', 'price', 'desc',
+    raw_detail_product = Products.objects.filter(name=param).values('name', 'price', 'stock', 'desc',
                                                                     'size__name', 'category__name',
                                                                     'brand__name', 'image')
     # preprocess data raw to clean
     list_product = defaultdict(lambda: defaultdict(list))
     for item in raw_detail_product:
         list_product[item['name']]['price'].append(int(item['price']))
+        list_product[item['name']]['stock'].append(item['stock'])
         list_product[item['name']]['desc'].append(item['desc'])
         list_product[item['name']]['size'].append(item['size__name'])
         list_product[item['name']]['category'].append(item['category__name'])
         list_product[item['name']]['brand'].append(item['brand__name'])
         list_product[item['name']]['image'].append(item['image'])
     return list_product
+
+
+def item_details_product(raw_detail):
+    img = [image for key, value in raw_detail.items() for image in value.get('image')]
+    context = {'available_size': [{'size': item} for key, value in raw_detail.items() for item in value.get('size')],
+               'images': [img[i:i+3] for i in range(0, len(img), 3)],
+               'brand': [item.get('brand')[0] for item in raw_detail.values()][0],
+               'price': [f'{sorted(value["price"])[0]:,} s/d {sorted(value["price"])[-1]:,}'
+                         if len(value['price']) > 1 else f'{sorted(value["price"])[0]:,}'
+                         for key, value in raw_detail.items()][0],
+               'description': [item.get('desc')[0] for item in raw_detail.values()][0],
+               'available_stock': ' / '.join([f'{SIZE_DICT[size]} : {stock}' for key, value in raw_detail.items()
+                                              for size, stock in zip(value.get('size'), value.get('stock'))]),
+               'related_product': query_get_product(list(raw_detail.keys())[0].split(' ')[0])}
+    return context
+
+# -------------------------- end function preprocessing data --------------------------

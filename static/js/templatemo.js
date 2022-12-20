@@ -37,8 +37,11 @@ $(document).ready(function() {
       return false;
     });
     $('#btn-plus').click(function(){
-      var val = $("#var-value").html();
-      val++;
+      var val = parseInt($("#var-value").html());
+      var max_quantity = document.getElementById("max-quantity").value.match(/\d+/);
+      if (val < max_quantity){
+          val++;
+      };
       $("#var-value").html(val);
       $("#product-quanity").val(val);
       return false;
