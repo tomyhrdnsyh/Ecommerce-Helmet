@@ -1,0 +1,60 @@
+{% extends "layout/base.html" %}
+{% load static %}
+{% block title %} Cart {% endblock %}
+
+{% block content %}
+
+<section class="bg-light">
+        <div class="container pb-5">
+            <div class="row">
+                <div class="col-lg-12 mt-5">
+                    <div class="card">
+                      <div class="card-body">
+                            <div class="row">
+                                <div class="col-3 col-lg-2">
+                                    <img class="img-fluid" src="{% static 'img/banner_AGV_1.png' %}" alt="Card image cap" id="product-detail">
+                                </div>
+                                <div class="col-6">
+                                    <h5 class="card-title">Helm Memek</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">Size : L</h6>
+                                    <p class="card-text"><strong>Rp. 100.000</strong></p>
+                                </div>
+                            </div>
+                      </div>
+                      <div class="card-footer">
+                        <div class="row justify-content-center">
+                            <div class="col-2 col-lg-3 d-grid">
+<!--                                <ul class="list-inline m-0">-->
+<!--                                    <li class="list-inline-item"><i class="fa fa-trash" style="color: grey;" id="btn-delete"></i></li>-->
+<!--                                    -->
+<!--                                </ul>-->
+                                <button type="submit" value="delete_cart" class="btn btn-light fa fa-trash" style="color: grey;"></button>
+                            </div>
+                            <div class="col-6 col-lg-3 d-flex">
+                                <ul class="list-inline list-inline mx-auto justify-content-center">
+                                    <li class="list-inline-item text-right">
+                                        Quantity
+                                        <input type="hidden" name="product-quanity" id="product-quanity" value="1">
+                                        <input type="hidden" name="max-quanity" id="max-quantity" value="{{ available_stock|get_digit:1 }}">
+                                    </li>
+                                    <li class="list-inline-item"><span class="fa fa-minus-circle" style="color: #59AB6E;" id="btn-minus"></span></li>
+                                    <li class="list-inline-item "><span class="text-secondary" id="var-value">1</span></li>
+                                    <li class="list-inline-item"><span class="fa fa-plus-circle" style="color: #59AB6E;" id="btn-plus"></span></li>
+                                </ul>
+                            </div>
+                            <div class="col-4 col-lg-6 d-grid">
+                                <button type="submit" value="buy" class="btn btn-success">Buy</button>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+<!--                    <div class="card">-->
+
+
+<!--                    </div>-->
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
