@@ -79,7 +79,7 @@ def pages(request):
                         i = value.get('size').index(request.GET.get('size'))    # index of size
                         raw_detail_filter_size = {key: {key: [value[i]] for key, value in value.items()}}
                         context.update(item_details_product(raw_detail_filter_size))
-                        print(context)
+
     # ====== END PRODUCT DETAIL ======
 
     context['segment'] = load_template
