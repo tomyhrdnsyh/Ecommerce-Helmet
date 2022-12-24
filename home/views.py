@@ -58,7 +58,7 @@ def pages(request):
 
     # ====== END SHOP MENU ======
 
-    # ====== PRODUCT DETAIL ======
+    # ====== shop-single ======
     if load_template == 'shop-single.html':
 
         if request.GET.get('name'):
@@ -68,7 +68,7 @@ def pages(request):
             context['name'] = name_product
 
             raw_detail = details_product(name_product)
-            context.update(item_details_product(raw_detail))
+            context.update(item_shop_single(raw_detail))
 
 
             # End general shop-single
@@ -78,9 +78,20 @@ def pages(request):
                     if request.GET.get('size') in value.get('size'):
                         i = value.get('size').index(request.GET.get('size'))    # index of size
                         raw_detail_filter_size = {key: {key: [value[i]] for key, value in value.items()}}
-                        context.update(item_details_product(raw_detail_filter_size))
+                        context.update(item_shop_single(raw_detail_filter_size))
 
-    # ====== END PRODUCT DETAIL ======
+    # ====== end shop-single ======
+
+    # ====== cart ======
+    if load_template == 'cart.html':
+        if request.GET.get('name'):
+            # General shop-single
+            name_product = request.GET.get('name')
+            context['name'] = name_product
+
+            raw_detail = details_product(name_product)
+            context.update(item_shop_single(raw_detail, related_product=False))
+            print(context)
 
     context['segment'] = load_template
     html_template = loader.get_template(load_template)
@@ -146,7 +157,7 @@ def details_product(param):
     return list_product
 
 
-def item_details_product(raw_detail):
+def item_shop_single(raw_detail, related_product=True):
     img = [image for key, value in raw_detail.items() for image in value.get('image')]
     context = {'available_size': [{'size': item} for key, value in raw_detail.items() for item in value.get('size')],
                'images': [img[i:i+3] for i in range(0, len(img), 3)],
@@ -156,8 +167,11 @@ def item_details_product(raw_detail):
                          for key, value in raw_detail.items()][0],
                'description': [item.get('desc')[0] for item in raw_detail.values()][0],
                'available_stock': ' / '.join([f'{SIZE_DICT[size]} : {stock}' for key, value in raw_detail.items()
-                                              for size, stock in zip(value.get('size'), value.get('stock'))]),
-               'related_product': query_get_product(list(raw_detail.keys())[0].split(' ')[0])}
+                                              for size, stock in zip(value.get('size'), value.get('stock'))])}
+
+    if related_product:
+        context['related_product'] = query_get_product(list(raw_detail.keys())[0].split(' ')[0])
+
     return context
 
 # -------------------------- end function preprocessing data --------------------------

@@ -1,0 +1,21 @@
+{% extends "layout/base-auth.html" %}
+{% load static %}
+{% block title %} Login {% endblock %}
+
+
+{% block content %}
+<div class="col-md-6">
+  <div class="m-5">
+      <h2 data-aos="fade-up" class="text-center" data-aos-delay="250">Welcome!</h2>
+  </div>
+  <div class="m-5">
+      <p class="text-center" data-aos="fade-up" data-aos-delay="350">Thanks for spending some quality time with the Web site today</p>
+      <form method="get" action="{% url 'login' %}" data-aos="fade-up" data-aos-delay="500">
+        <button id="submit-button" class="form-control">Log in again</button>
+      </form>
+  </div>
+</div>
+<div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
+  <img data-aos="fade-up" data-aos-delay="500" src="{% static 'img/login-register/logout.jpg' %}" alt="login" class="img-fluid p-5">
+</div>
+{% endblock content %}

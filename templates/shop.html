@@ -81,7 +81,9 @@
                                     <ul class="list-unstyled">
                                         <li><a class="btn btn-success text-white" href="#"><i class="far fa-heart"></i></a></li>
                                         <li><a class="btn btn-success text-white mt-2" href="shop-single.html?name={{ item.name }}"><i class="far fa-eye"></i></a></li>
-                                        <li><a class="btn btn-success text-white mt-2" href="cart.html"><i class="fas fa-cart-plus"></i></a></li>
+                                        {% if 's/d' not in item.price %}
+                                        <li><a class="btn btn-success text-white mt-2" href="cart.html?name={{ item.name }}"><i class="fas fa-cart-plus"></i></a></li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                             </div>

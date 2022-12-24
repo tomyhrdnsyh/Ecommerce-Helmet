@@ -15,9 +15,11 @@
                                     <img class="img-fluid" src="{% static 'img/banner_AGV_1.png' %}" alt="Card image cap" id="product-detail">
                                 </div>
                                 <div class="col-6">
-                                    <h5 class="card-title">Helm Pekok</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">Size : L</h6>
-                                    <p class="card-text"><strong>Rp. 100.000</strong></p>
+                                    <h5 class="card-title">{{ name }}</h5>
+                                    {% for item in available_size %}
+                                    <h6 class="card-subtitle mb-2 text-muted">Size : {{ item.size }}</h6>
+                                    {% endfor %}
+                                    <p class="card-text"><strong>Rp. {{ price }}</strong></p>
                                 </div>
                             </div>
                       </div>
