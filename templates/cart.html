@@ -23,24 +23,14 @@
                       </div>
                       <div class="card-footer">
                         <div class="row justify-content-center">
-                            <div class="col-2 col-lg-3 d-grid">
-<!--                                <ul class="list-inline m-0">-->
-<!--                                    <li class="list-inline-item"><i class="fa fa-trash" style="color: grey;" id="btn-delete"></i></li>-->
-<!--                                    -->
-<!--                                </ul>-->
-                                <button type="submit" value="delete_cart" class="btn btn-light fa fa-trash" style="color: grey;"></button>
+                            <div class="col-6 col-lg-3 d-flex navbar">
+                                Quantity
+                                <a class="nav-icon position-relative text-decoration-none"><span class="btn fa fa-minus-circle" style="color: #59AB6E;" id="btn-minus"></span></a>
+                                <a class="nav-icon position-relative text-decoration-none"><span class="text-secondary" id="var-value">1</span></a>
+                                <a class="nav-icon position-relative text-decoration-none"><span class="btn fa fa-plus-circle" style="color: #59AB6E;" id="btn-plus"></span></a>
                             </div>
-                            <div class="col-6 col-lg-3 d-flex">
-                                <ul class="list-inline list-inline mx-auto justify-content-center">
-                                    <li class="list-inline-item text-right">
-                                        Quantity
-                                        <input type="hidden" name="product-quanity" id="product-quanity" value="1">
-                                        <input type="hidden" name="max-quanity" id="max-quantity" value="{{ available_stock|get_digit:1 }}">
-                                    </li>
-                                    <li class="list-inline-item"><span class="fa fa-minus-circle" style="color: #59AB6E;" id="btn-minus"></span></li>
-                                    <li class="list-inline-item "><span class="text-secondary" id="var-value">1</span></li>
-                                    <li class="list-inline-item"><span class="fa fa-plus-circle" style="color: #59AB6E;" id="btn-plus"></span></li>
-                                </ul>
+                            <div class="col-2 col-lg-3 d-grid">
+                                <button type="submit" value="delete_cart" class="btn btn-light fa fa-trash" style="color: grey;"></button>
                             </div>
                             <div class="col-4 col-lg-6 d-grid">
                                 <button type="submit" value="buy" class="btn btn-success">Buy</button>
@@ -57,4 +47,8 @@
         </div>
     </section>
 
+{% endblock %}
+{% block javascripts %}
+    <!-- Start Slider Script -->
+    <script src="{% static 'js/slick.min.js' %}"></script>
 {% endblock %}
