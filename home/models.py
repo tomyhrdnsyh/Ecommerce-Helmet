@@ -115,14 +115,14 @@ class Cart(models.Model):
     cart_id = models.AutoField(primary_key=True)
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    unique_code = models.CharField(max_length=250)
-    status = models.BooleanField()
+    unique_code = models.CharField(max_length=250, null=True, blank=True)
+    status = models.BooleanField(default=False)
     quantity = models.IntegerField()
     date = models.DateField()
     price_total = models.FloatField()
 
     def __str__(self):
-        return self.product
+        return str(self.user)
 
 
 class Order(models.Model):
