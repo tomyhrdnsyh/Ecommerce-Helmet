@@ -6,7 +6,12 @@
     <!-- Start Content -->
     <div class="container py-5">
         <div class="row">
-
+        {% for message in messages %}
+        <div class="alert {% if message.tags %} {{ message.tags }} {% endif %} alert-dismissible fade show" role="alert" data-aos="fade-up" data-aos-delay="300">
+          <strong>Holy {{ request.user.username }}!</strong> {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
             <div class="col-lg-3">
                 <h1 class="h2 pb-4">Categories</h1>
                 <ul class="list-unstyled templatemo-accordion">
@@ -82,7 +87,7 @@
                                         <li><a class="btn btn-success text-white" href="#"><i class="far fa-heart"></i></a></li>
                                         <li><a class="btn btn-success text-white mt-2" href="shop-single.html?name={{ item.name }}"><i class="far fa-eye"></i></a></li>
                                         {% if 's/d' not in item.price %}
-                                        <li><a class="btn btn-success text-white mt-2" href="cart.html?name={{ item.name }}"><i class="fas fa-cart-plus"></i></a></li>
+                                        <li><a class="btn btn-success text-white mt-2" href="shop.html?product_id={{ item.product_id }}"><i class="fas fa-cart-plus"></i></a></li>
                                         {% endif %}
                                     </ul>
                                 </div>

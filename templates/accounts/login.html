@@ -10,6 +10,13 @@
       <h2 data-aos="fade-up" class="text-center" data-aos-delay="250">Welcome!</h2>
       {% if msg %}
         <p class="text-danger text-center" data-aos="fade-up" data-aos-delay="300"> {{ msg | safe }} </p>
+      {% elif messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %} {{ message.tags }} {% endif %} alert-dismissible fade show" role="alert" data-aos="fade-up" data-aos-delay="300">
+          <strong>Holy anonymous!</strong> {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
       {% else %}
         <p class="text-center" data-aos="fade-up" data-aos-delay="300">Enter your credential</p>
       {% endif %}

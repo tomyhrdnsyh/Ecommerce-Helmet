@@ -6,42 +6,42 @@
 
 <section class="bg-light">
         <div class="container pb-5">
+
+            {% for item in cart_info %}
             <div class="row">
-                <div class="col-lg-12 mt-5">
+                <div class="col-lg-12 {% if forloop.first %} mt-5 {% else %} mt-3 {% endif %}">
                     <div class="card">
                       <div class="card-body">
                             <div class="row">
                                 <div class="col-3 col-lg-2">
-                                    <img class="img-fluid" src="{% static 'img/banner_AGV_1.png' %}" alt="Card image cap" id="product-detail">
+                                    <img class="img-fluid" src="{{ item.product__image }}" alt="Card image cap" id="product-detail">
                                 </div>
                                 <div class="col-6">
-                                    <h5 class="card-title">{{ name }}</h5>
-                                    {% for item in available_size %}
-                                    <h6 class="card-subtitle mb-2 text-muted">Size : {{ item.size }}</h6>
-                                    {% endfor %}
-                                    <p class="card-text"><strong>Rp. {{ price }}</strong></p>
+                                    <h5 class="card-title">{{ item.product__name }}</h5>
+                                    <h6 class="card-subtitle mb-2 mb-lg-3 text-muted">Size : {{ item.product__size__name }}</h6>
+                                    <h6 class="card-subtitle mb-2 mb-lg-3 text-muted">Price : Rp. {{ item.product__price }}</h6>
+                                    <h6 class="card-subtitle mb-2 mb-lg-3 text-muted">Quantity : {{ item.quantity }}</h6>
+                                    <h6 class="card-text"><strong>Total Rp. {{ item.price_total }}</strong></h6>
                                 </div>
                             </div>
                       </div>
                       <div class="card-footer">
                         <div class="row justify-content-center">
-                            <div class="col-6 col-lg-3 d-flex navbar">
-                                Quantity
-                                <a class="nav-icon position-relative text-decoration-none"><span class="btn fa fa-minus-circle" style="color: #59AB6E;" id="btn-minus"></span></a>
-                                <a class="nav-icon position-relative text-decoration-none"><span class="text-secondary" id="var-value">1</span></a>
-                                <a class="nav-icon position-relative text-decoration-none"><span class="btn fa fa-plus-circle" style="color: #59AB6E;" id="btn-plus"></span></a>
-                            </div>
-                            <div class="col-2 col-lg-3 d-grid">
-                                <button type="submit" value="delete_cart" class="btn btn-light fa fa-trash" style="color: grey;"></button>
-                            </div>
-                            <div class="col-4 col-lg-6 d-grid">
+                            <form method="POST" class="col-6 d-grid">
+                                {% csrf_token %}
+                                <input type="hidden" name="cart_id" value="{{ item.cart_id }}">
+                                <button type="submit" name="delete_cart" class="btn btn-light fa fa-trash" style="color: grey;"></button>
+                            </form>
+                            <div class="col-6 d-grid">
                                 <a href="/checkout.html" class="btn btn-success">Buy</a>
                             </div>
+
                         </div>
                       </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
 
         </div>
     </section>

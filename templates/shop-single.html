@@ -97,15 +97,16 @@
                                 <li>{{ description }}</li>
                             </ul>
 
-                            <form action="" method="GET">
+                            <form action="" method="POST">
+                                {% csrf_token %}
                                 <input type="hidden" name="product-title" value="Activewear">
                                 <div class="row">
                                     <div class="col-auto">
                                         <ul class="list-inline pb-3">
                                             <li class="list-inline-item">Size :
-                                                <input type="hidden" name="product-size" id="product-size" value="S">
-                                            </li>
                                             {% for item in available_size %}
+                                                <input type="hidden" name="product-size" value="{{ item.size }}">
+                                            </li>
                                             <li class="list-inline-item">
                                                 <a href="/shop-single.html?name={{ name }}&size={{ item.size }}"><span>{{ item.size }}</span></a>
                                             </li>
@@ -119,6 +120,7 @@
                                                 Quantity
                                                 <input type="hidden" name="product-quanity" id="product-quanity" value="1">
                                                 <input type="hidden" name="max-quanity" id="max-quantity" value="{{ available_stock|get_digit:1 }}">
+                                                <input type="hidden" name="product_id" value="{{ product_id }}">
                                             </li>
                                             <li class="list-inline-item"><span class="btn btn-success" id="btn-minus">-</span></li>
                                             <li class="list-inline-item"><span class="badge bg-secondary" id="var-value">1</span></li>
