@@ -1,0 +1,12 @@
+{% extends "layout/base.html" %}
+{% load static %}
+{% block title %} Product Detail {% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/slick.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/slick-theme.css' %}">
+{% endblock stylesheets %}
+
+{% block content %}
+    {{ status_code }}
+{% endblock %}

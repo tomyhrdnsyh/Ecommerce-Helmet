@@ -68,19 +68,19 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ("cart_id", "product", "user", "unique_code", "status",
+    list_display = ("cart_id", "product", "user",
                     "quantity", "date", "price_total")
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("order_id", "unique_code", "date", "created_at", "updated_at",
-                    "gross_amount", "status")
+    list_display = ("order_id", "product", "user", "unique_code",
+                    "created_at", "updated_at", "gross_amount", "status")
 
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ("payment_id", "order", "store",
+    list_display = ("payment_id", "order", "transaction_time",
                     "gross_amount", "payment_type")
 
 

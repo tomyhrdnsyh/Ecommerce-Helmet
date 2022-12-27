@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
+from datetime import datetime
 
 
 class CustomUser(AbstractUser):
@@ -115,8 +116,6 @@ class Cart(models.Model):
     cart_id = models.AutoField(primary_key=True)
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    unique_code = models.CharField(max_length=250, null=True, blank=True)
-    status = models.BooleanField(default=False)
     quantity = models.IntegerField()
     date = models.DateField()
     price_total = models.FloatField()
@@ -127,21 +126,22 @@ class Cart(models.Model):
 
 class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
+    product = models.ForeignKey(Products, on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     unique_code = models.CharField(max_length=250)
-    date = models.DateField()
-    created_at = models.DateField()
-    updated_at = models.DateField()
+    created_at = models.DateTimeField(editable=False, auto_now_add=True)
+    updated_at = models.DateTimeField()
     gross_amount = models.IntegerField()
-    status = models.BooleanField()
+    status = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.order_id
+        return str(self.product)
 
 
 class Payment(models.Model):
     payment_id = models.AutoField(primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    store = models.CharField(max_length=100)
+    transaction_time = models.DateTimeField(null=True)
     gross_amount = models.IntegerField()
     payment_type = models.CharField(max_length=100)
 
@@ -159,7 +159,7 @@ class ProductPurchases(models.Model):
     status = models.BooleanField()
 
     def __str__(self):
-        return self.product
+        return str(self.product)
 
     class Meta:
         verbose_name_plural = 'Product Purchases'

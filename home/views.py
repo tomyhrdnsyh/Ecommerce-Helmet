@@ -20,6 +20,14 @@ def index(request):
     # total product in cart
     context['total_in_cart'] = total_product_in_cart(request)
 
+    # update status order
+    if request.GET.get('status_code'):
+        unique_code = request.GET.get('order_id')
+        update_status_order = Order.objects.get(unique_code=unique_code)
+        update_status_order.status = request.GET.get('transaction_status')
+        update_status_order.updated_at = datetime.now()
+        update_status_order.save()
+
     html_template = loader.get_template('index.html')
     return HttpResponse(html_template.render(context, request))
 
@@ -88,6 +96,10 @@ def pages(request):
     # ====== shop-single ======
     if load_template == 'shop-single.html':
 
+        # delete session variable cart_id in shop-single page
+        if request.session.get('cart_id'):
+            del request.session['cart_id']
+
         if request.GET.get('name'):
 
             # General shop-single
@@ -141,109 +153,100 @@ def pages(request):
             messages.info(request, 'You must login first for use this feature!')
             return redirect('login')
 
-        context['cart_info'] = Cart.objects.filter(user=request.user).values('cart_id', 'product__name',
-                                                                             'product__price', 'product__image',
-                                                                             'quantity', 'price_total',
-                                                                             'product__size__name')
-        if 'delete_cart' in request.POST:
-            cart_id = request.POST.get('cart_id')
-            cart = Cart.objects.get(cart_id=cart_id)
-            cart.delete()
-            return redirect('/cart.html')
+        cart = Cart.objects.filter(user=request.user).values('cart_id', 'product__name', 'product',
+                                                             'product__price', 'product__image',
+                                                             'quantity', 'price_total',
+                                                             'product__size__name')
+
+        for item in cart:
+            item['price_total'] = f"{int(item['price_total']):,}"
+            item['product__price'] = f"{int(item['product__price']):,}"
+
+        context['cart_info'] = cart
+        if request.POST:
+            if 'delete_cart' in request.POST:
+                cart_id = request.POST.get('delete_cart')
+                cart = Cart.objects.get(cart_id=cart_id)
+                cart.delete()
+                return redirect('/cart.html')
+
+            if 'buy' in request.POST:
+                request.session['id'] = request.POST.get('product_id')
+                request.session['cart_id'] = request.POST.get('cart-id')
+                request.session['name'] = request.POST.get('product-title')
+                request.session['img'] = request.POST.get('product-img')
+                request.session['size'] = request.POST.get('product-size')
+                request.session['price'] = request.POST.get('product-price')
+                request.session['quantity'] = request.POST.get('product-quanity')
+                request.session['total'] = request.POST.get('product-total')
+                return redirect('/checkout.html')
     # ============ end cart =================
 
     # ====================== checkout ====================
     if load_template == 'checkout.html':
         if request.POST:
+            unique_code = uuid.uuid1()
 
-            # ---------- testing midtrans ----------
-            snap = midtransclient.Snap(
-                is_production=False,
-                server_key='SB-Mid-server-01NTFWb6l738KBzH0OWZuhks',
-                client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
+            # ---------- sandbox midtrans ----------
+            transaction = get_midtrans(request, order_id=unique_code)
+            # status_response = api_client.transactions.notification(mock_notification)
+            # ---------- end midtrans ----------
+            # ------------ save to order model ------------
+            save_order = Order(
+                product=Products.objects.get(product_id=request.POST.get('product-id')),
+                user=request.user,
+                unique_code=unique_code,
+                gross_amount=int(request.POST.get('product-total').replace(',', '')),
+                updated_at=datetime.now(),
+                status='Pending'
             )
+            save_order.save()
+            # ------------ end save ------------
+            # ------------ delete cart ------------
+            if request.POST.get('cart-id'):
+                delete_cart = Cart.objects.get(cart_id=request.POST.get('cart-id'))
+                delete_cart.delete()
+            # ------------ end delete cart ------------
 
-            param = {
-                "transaction_details": {
-                    "order_id": f"{uuid.uuid1()}",
-                    "gross_amount": int(request.POST.get('product-total').replace(',', ''))
-                }, "item_details": [{
-                    "id": request.POST.get('product-id'),
-                    "price": int(request.POST.get('product-price').replace(',', '')),
-                    "quantity": request.POST.get('product-qty'),
-                    "name": request.POST.get('product-name'),
-                    "brand": request.POST.get('product-price'),
-                    # "category": "Toys",
-                    # "merchant_name": "Midtrans"
-                }],
-                "customer_details": {
-                    "first_name": request.POST.get('name'),
-                    "email": request.POST.get('email'),
-                    # "phone": "+628123456",
-                    "billing_address": {
-                        "first_name": request.POST.get('name'),
-                        "email": request.POST.get('email'),
-                        # "phone": "081 2233 44-55",
-                        "address": request.POST.get('address'),
-                        "postal_code": request.POST.get('zipcode'),
-                        "city":  request.POST.get('city'),
-                        "province":  request.POST.get('province'),
-                        "country_code":  "IDN"
-                    },
-                    "shipping_address": {
-                        "first_name": request.POST.get('name'),
-                        "email": request.POST.get('email'),
-                        # "phone": "0 8128-75 7-9338",
-                        "address": request.POST.get('address'),
-                        "postal_code": request.POST.get('zipcode'),
-                        "city":  request.POST.get('city'),
-                        "province":  request.POST.get('province'),
-                        "country_code":  "IDN"
-                    }
-                },
-                "enabled_payments": ["credit_card", "mandiri_clickpay", "cimb_clicks", "bca_klikbca", "bca_klikpay",
-                                     "bri_epay", "echannel", "indosat_dompetku", "mandiri_ecash", "permata_va", "bca_va",
-                                     "bni_va", "other_va", "kioson", "indomaret", "gci", "danamon_online"],
-                "bca_va": {
-                    "va_number": "12345678911",
-                    "free_text": {
-                        "inquiry": [
-                            {
-                                "en": "text in English",
-                                "id": "text in Bahasa Indonesia"
-                            }
-                        ],
-                        "payment": [
-                            {
-                                "en": "text in English",
-                                "id": "text in Bahasa Indonesia"
-                            }
-                        ]
-                    }
-                },
-                "bni_va": {
-                    "va_number": "12345678"
-                },
-                "permata_va": {
-                    "va_number": "1234567890",
-                    "recipient_name": "SUDARSONO"
-                },
-                "callbacks": {
-                    "finish": "http://192.168.0.103:8001/"
-                },
-                "expiry": {
-                    "start_time": str((datetime.now() + timedelta(days=1)).replace(microsecond=0)) + "+0700",
-                    "unit": "minute",
-                    "duration": 9000
-                },
-            }
-            # create transaction
-            transaction = snap.create_transaction(param)
-            request.session['transaction_token'] = transaction['token']
             return redirect(transaction['redirect_url'])
+
+            # ---- load by javascript ----------
+            # request.session['transaction_token'] = transaction['token']
             # return redirect('/midtrans-test.html')
 
-        # ---------- testing midtrans ----------
+    # ====================== end checkout ====================
+
+    if load_template == 'profile.html':
+
+        # update status every load this page
+
+        api_client = midtransclient.CoreApi(
+            is_production=False,
+            server_key='SB-Mid-server-01NTFWb6l738KBzH0OWZuhks',
+            client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
+        )
+
+        unique_code = Order.objects.filter(user=request.user).values('unique_code', 'product__name')
+        for item in unique_code:
+            try:
+                status_response = api_client.transactions.status(item['unique_code'])
+                update_order = Order.objects.get(unique_code=item['unique_code'])
+                update_order.status = status_response.get('transaction_status')
+                update_order.save()
+
+                obj, created = Payment.objects.update_or_create(
+                    order=Order.objects.get(unique_code=item['unique_code']),
+                    defaults={
+                        'transaction_time': status_response.get('transaction_time'),
+                        'gross_amount': int(status_response.get('gross_amount').replace('.00', '')),
+                        'payment_type': status_response.get('payment_type')
+                    }
+                )
+
+            except Exception as e:
+                status_response = e
+            # finally:
+            #     context['status_code'] = status_response
 
     context['segment'] = load_template
     html_template = loader.get_template(load_template)
@@ -363,5 +366,98 @@ def total_product_in_cart(request):
     if request.user.is_authenticated:
         return len(Cart.objects.filter(user=request.user))
     return 0
+
+
+def get_midtrans(request, order_id):
+    snap = midtransclient.Snap(
+        is_production=False,
+        server_key='SB-Mid-server-01NTFWb6l738KBzH0OWZuhks',
+        client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
+    )
+
+    param = {
+        "transaction_details": {
+            "order_id": f"{order_id}",
+            "gross_amount": int(request.POST.get('product-total').replace(',', ''))
+        }, "item_details": [{
+            "id": request.POST.get('product-id'),
+            "price": int(request.POST.get('product-price').replace(',', '')),
+            "quantity": request.POST.get('product-qty'),
+            "name": request.POST.get('product-name'),
+            "brand": request.POST.get('product-price'),
+            # "category": "Toys",
+            # "merchant_name": "Midtrans"
+        }],
+        "customer_details": {
+            "first_name": request.POST.get('name'),
+            "email": request.POST.get('email'),
+            # "phone": "+628123456",
+            "billing_address": {
+                "first_name": request.POST.get('name'),
+                "email": request.POST.get('email'),
+                # "phone": "081 2233 44-55",
+                "address": request.POST.get('address'),
+                "postal_code": request.POST.get('zipcode'),
+                "city": request.POST.get('city'),
+                "province": request.POST.get('province'),
+                "country_code": "IDN"
+            },
+            "shipping_address": {
+                "first_name": request.POST.get('name'),
+                "email": request.POST.get('email'),
+                # "phone": "0 8128-75 7-9338",
+                "address": request.POST.get('address'),
+                "postal_code": request.POST.get('zipcode'),
+                "city": request.POST.get('city'),
+                "province": request.POST.get('province'),
+                "country_code": "IDN"
+            }
+        },
+
+        "enabled_payments": ["credit_card", "mandiri_clickpay", "cimb_clicks", "bca_klikbca", "bca_klikpay",
+                             "bri_epay", "echannel", "indosat_dompetku", "mandiri_ecash", "permata_va",
+                             "bca_va", "gopay",
+                             "bni_va", "other_va", "kioson", "indomaret", "gci", "danamon_online"],
+        # "gopay_partner": {
+        #     "phone_number": "81234567891",
+        #     "country_code": "62",
+        #     "redirect_url": "https://mywebstore.com/gopay-linking-finish"  # please update with your redirect URL
+        # },
+        "bca_va": {
+            "va_number": "12345678911",
+            "free_text": {
+                "inquiry": [
+                    {
+                        "en": "text in English",
+                        "id": "text in Bahasa Indonesia"
+                    }
+                ],
+                "payment": [
+                    {
+                        "en": "text in English",
+                        "id": "text in Bahasa Indonesia"
+                    }
+                ]
+            }
+        },
+        "bni_va": {
+            "va_number": "12345678"
+        },
+        "permata_va": {
+            "va_number": "1234567890",
+            "recipient_name": "SUDARSONO"
+        },
+        "callbacks": {
+            "finish": "http://192.168.0.103:8001/"
+        },
+        "expiry": {
+            "start_time": str(datetime.now().replace(microsecond=0)) + "+0700",
+            "unit": "minute",
+            "duration": 60 * 24
+        },
+    }
+    # create transaction
+    transaction = snap.create_transaction(param)
+    return transaction
 
 # -------------------------- end function preprocessing data --------------------------

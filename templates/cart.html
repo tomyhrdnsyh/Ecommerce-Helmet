@@ -29,12 +29,21 @@
                         <div class="row justify-content-center">
                             <form method="POST" class="col-6 d-grid">
                                 {% csrf_token %}
-                                <input type="hidden" name="cart_id" value="{{ item.cart_id }}">
-                                <button type="submit" name="delete_cart" class="btn btn-light fa fa-trash" style="color: grey;"></button>
+                                <button type="submit" name="delete_cart" value="{{ item.cart_id }}" class="btn btn-light fa fa-trash" style="color: grey;"></button>
                             </form>
-                            <div class="col-6 d-grid">
-                                <a href="/checkout.html" class="btn btn-success">Buy</a>
-                            </div>
+                            <form method="POST" class="col-6 d-grid">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ item.product }}">
+                                <input type="hidden" name="cart-id" value="{{ item.cart_id }}">
+                                <input type="hidden" name="product-title" value="{{ item.product__name }}">
+                                <input type="hidden" name="product-img" value="{{ item.product__image }}">
+                                <input type="hidden" name="product-size" value="{{ item.product__size__name }}">
+                                <input type="hidden" name="product-price" value="{{ item.product__price }}">
+                                <input type="hidden" name="product-quanity" value="{{ item.quantity }}">
+                                <input type="hidden" name="product-total" value="{{ item.price_total }}">
+
+                                <button type="submit" name="buy" class="btn btn-success">Buy</button>
+                            </form>
 
                         </div>
                       </div>
