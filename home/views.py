@@ -6,7 +6,9 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from collections import defaultdict
 from django.contrib import messages
-from datetime import datetime
+from datetime import datetime, timedelta
+import midtransclient
+import uuid
 
 # Create your views here.
 SIZE_DICT = {'S': 'Small', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
@@ -105,18 +107,31 @@ def pages(request):
                         context.update(item_shop_single(raw_detail_filter_size))
 
         if request.POST:
-            product_id = request.POST.get('product_id')
-            try:
-                cart = Cart.objects.get(product=product_id)
-                update_cart_model(req=request, cart=cart, product=Products.objects.get(product_id=product_id))
-                msg = 'Cart update success!'
-            except Cart.DoesNotExist:
-                product = Products.objects.get(product_id=product_id)
-                add_to_cart_model(req=request, product=product)
-                msg = 'Add to cart success!'
+            if request.POST.get('buy'):
+                request.session['id'] = request.POST.get('product_id')
+                request.session['name'] = request.POST.get('product-title')
+                request.session['img'] = request.POST.get('product-img')
+                request.session['size'] = request.POST.get('product-size')
+                request.session['price'] = request.POST.get('product-price')
+                request.session['quantity'] = request.POST.get('product-quanity')
+                total = int(request.POST.get('product-quanity')) * int(
+                    request.POST.get('product-price').replace(',', ''))
+                request.session['total'] = f'{total:,}'
+                return redirect('/checkout.html')
 
-            messages.success(request, msg)
-            return redirect('/shop.html')
+            else:
+                product_id = request.POST.get('product_id')
+                try:
+                    cart = Cart.objects.get(product=product_id)
+                    update_cart_model(req=request, cart=cart, product=Products.objects.get(product_id=product_id))
+                    msg = 'Cart update success!'
+                except Cart.DoesNotExist:
+                    product = Products.objects.get(product_id=product_id)
+                    add_to_cart_model(req=request, product=product)
+                    msg = 'Add to cart success!'
+
+                messages.success(request, msg)
+                return redirect('/shop.html')
 
     # ====== end shop-single ======
 
@@ -135,6 +150,100 @@ def pages(request):
             cart = Cart.objects.get(cart_id=cart_id)
             cart.delete()
             return redirect('/cart.html')
+    # ============ end cart =================
+
+    # ====================== checkout ====================
+    if load_template == 'checkout.html':
+        if request.POST:
+
+            # ---------- testing midtrans ----------
+            snap = midtransclient.Snap(
+                is_production=False,
+                server_key='SB-Mid-server-01NTFWb6l738KBzH0OWZuhks',
+                client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
+            )
+
+            param = {
+                "transaction_details": {
+                    "order_id": f"{uuid.uuid1()}",
+                    "gross_amount": int(request.POST.get('product-total').replace(',', ''))
+                }, "item_details": [{
+                    "id": request.POST.get('product-id'),
+                    "price": int(request.POST.get('product-price').replace(',', '')),
+                    "quantity": request.POST.get('product-qty'),
+                    "name": request.POST.get('product-name'),
+                    "brand": request.POST.get('product-price'),
+                    # "category": "Toys",
+                    # "merchant_name": "Midtrans"
+                }],
+                "customer_details": {
+                    "first_name": request.POST.get('name'),
+                    "email": request.POST.get('email'),
+                    # "phone": "+628123456",
+                    "billing_address": {
+                        "first_name": request.POST.get('name'),
+                        "email": request.POST.get('email'),
+                        # "phone": "081 2233 44-55",
+                        "address": request.POST.get('address'),
+                        "postal_code": request.POST.get('zipcode'),
+                        "city":  request.POST.get('city'),
+                        "province":  request.POST.get('province'),
+                        "country_code":  "IDN"
+                    },
+                    "shipping_address": {
+                        "first_name": request.POST.get('name'),
+                        "email": request.POST.get('email'),
+                        # "phone": "0 8128-75 7-9338",
+                        "address": request.POST.get('address'),
+                        "postal_code": request.POST.get('zipcode'),
+                        "city":  request.POST.get('city'),
+                        "province":  request.POST.get('province'),
+                        "country_code":  "IDN"
+                    }
+                },
+                "enabled_payments": ["credit_card", "mandiri_clickpay", "cimb_clicks", "bca_klikbca", "bca_klikpay",
+                                     "bri_epay", "echannel", "indosat_dompetku", "mandiri_ecash", "permata_va", "bca_va",
+                                     "bni_va", "other_va", "kioson", "indomaret", "gci", "danamon_online"],
+                "bca_va": {
+                    "va_number": "12345678911",
+                    "free_text": {
+                        "inquiry": [
+                            {
+                                "en": "text in English",
+                                "id": "text in Bahasa Indonesia"
+                            }
+                        ],
+                        "payment": [
+                            {
+                                "en": "text in English",
+                                "id": "text in Bahasa Indonesia"
+                            }
+                        ]
+                    }
+                },
+                "bni_va": {
+                    "va_number": "12345678"
+                },
+                "permata_va": {
+                    "va_number": "1234567890",
+                    "recipient_name": "SUDARSONO"
+                },
+                "callbacks": {
+                    "finish": "http://192.168.0.103:8001/"
+                },
+                "expiry": {
+                    "start_time": str((datetime.now() + timedelta(days=1)).replace(microsecond=0)) + "+0700",
+                    "unit": "minute",
+                    "duration": 9000
+                },
+            }
+            # create transaction
+            transaction = snap.create_transaction(param)
+            request.session['transaction_token'] = transaction['token']
+            return redirect(transaction['redirect_url'])
+            # return redirect('/midtrans-test.html')
+
+        # ---------- testing midtrans ----------
 
     context['segment'] = load_template
     html_template = loader.get_template(load_template)
@@ -153,20 +262,25 @@ def query_get_product(param=None, field=None):
     if param is not None and field is not None:
 
         if field == 'category__name':
-            data_raw = Products.objects.filter(category__name=param).values('product_id', 'name', 'price', 'size__name', 'image')
+            data_raw = Products.objects.filter(category__name=param).values('product_id', 'name', 'price', 'size__name',
+                                                                            'image')
         elif field == 'brand__name':
-            data_raw = Products.objects.filter(brand__name=param).values('product_id', 'name', 'price', 'size__name', 'image')
+            data_raw = Products.objects.filter(brand__name=param).values('product_id', 'name', 'price', 'size__name',
+                                                                         'image')
         elif field == 'size__name':
-            data_raw = Products.objects.filter(size__name=param).values('product_id', 'name', 'price', 'size__name', 'image')
+            data_raw = Products.objects.filter(size__name=param).values('product_id', 'name', 'price', 'size__name',
+                                                                        'image')
         elif field == 'size__size_category__name':
-            data_raw = Products.objects.filter(size__size_category__name=param).values('product_id', 'name', 'price', 'size__name',
+            data_raw = Products.objects.filter(size__size_category__name=param).values('product_id', 'name', 'price',
+                                                                                       'size__name',
                                                                                        'image')
 
     elif param is not None and field is None:
         data_raw = Products.objects.filter(Q(name__icontains=param) |
                                            Q(price__icontains=param) |
                                            Q(desc__icontains=param) |
-                                           Q(size__size_category__name__icontains=param)).values('name',  'product_id', 'price',
+                                           Q(size__size_category__name__icontains=param)).values('name', 'product_id',
+                                                                                                 'price',
                                                                                                  'size__name', 'image')
 
     else:
@@ -175,7 +289,6 @@ def query_get_product(param=None, field=None):
     # preprocess data raw to clean
     list_product = defaultdict(lambda: defaultdict(list))
     for item in data_raw:
-
         list_product[item['name']]['product_id'].append(item['product_id'])
         list_product[item['name']]['price'].append(int(item['price']))
         list_product[item['name']]['size'].append(item['size__name'])
