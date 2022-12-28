@@ -19,6 +19,7 @@ def index(request):
 
     # total product in cart
     context['total_in_cart'] = total_product_in_cart(request)
+    context['total_in_profile'] = total_product_buy(request)
 
     # update status order
     if request.GET.get('status_code'):
@@ -42,6 +43,7 @@ def pages(request):
 
     # total product in cart
     context['total_in_cart'] = total_product_in_cart(request)
+    context['total_in_profile'] = total_product_buy(request)
 
     # ====== check if any search ======
     if request.GET.get('q'):
@@ -196,6 +198,7 @@ def pages(request):
                 product=Products.objects.get(product_id=request.POST.get('product-id')),
                 user=request.user,
                 unique_code=unique_code,
+                quantity=request.POST.get('product-qty'),
                 gross_amount=int(request.POST.get('product-total').replace(',', '')),
                 updated_at=datetime.now(),
                 status='Pending'
@@ -216,8 +219,8 @@ def pages(request):
 
     # ====================== end checkout ====================
 
+    # ====================== Profile ====================
     if load_template == 'profile.html':
-
         # update status every load this page
 
         api_client = midtransclient.CoreApi(
@@ -226,7 +229,11 @@ def pages(request):
             client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
         )
 
-        unique_code = Order.objects.filter(user=request.user).values('unique_code', 'product__name')
+        unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code', 'product__name', 'quantity',
+                                                                     'gross_amount', 'product__image', 'product__price',
+                                                                     'product__brand__name', 'status',
+                                                                     'product__size__name', 'product__category__name')
+        output = []
         for item in unique_code:
             try:
                 status_response = api_client.transactions.status(item['unique_code'])
@@ -244,9 +251,23 @@ def pages(request):
                 )
 
             except Exception as e:
-                status_response = e
-            # finally:
-            #     context['status_code'] = status_response
+                err = e
+
+            else:
+                item['gross_amount'] = f"{item['gross_amount']:,}"
+                item['short_unique_code'] = item['unique_code'][:8] + "..."
+                item['transaction_time'] = status_response['transaction_time']
+                item['payment_type'] = status_response['payment_type']
+                item['product__price'] = f"{int(item['product__price']):,}"
+
+        context['profile_detail'] = unique_code
+
+        # check if user click buy again this product
+        if 'product_name' in request.GET:
+            product_name = request.GET.get('product_name')
+            list_product = query_get_product(param=product_name)
+            context['list_product'] = list_product
+            load_template = 'shop.html'
 
     context['segment'] = load_template
     html_template = loader.get_template(load_template)
@@ -365,6 +386,12 @@ def update_cart_model(req, cart, product):
 def total_product_in_cart(request):
     if request.user.is_authenticated:
         return len(Cart.objects.filter(user=request.user))
+    return 0
+
+
+def total_product_buy(request):
+    if request.user.is_authenticated:
+        return len(Order.objects.filter(user=request.user))
     return 0
 
 

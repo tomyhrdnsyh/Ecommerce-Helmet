@@ -8,5 +8,159 @@
 {% endblock stylesheets %}
 
 {% block content %}
-    {{ status_code }}
+    <section class="bg-light">
+        <div class="container pb-5">
+            {% for item in profile_detail %}
+            <div class="row">
+                <div class="col-lg-12 {% if forloop.first %} mt-5 {% else %} mt-3 {% endif %}">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row align-items-center">
+                                <div class="col-3">
+                                    <strong><i class="fa fa-shopping-cart" style="color: grey;"></i> Belanja</strong>
+                                </div>
+                                <div class="col-9 text-end">
+                                    <strong id="{{item.unique_code}}-status" class="btn {% if item.status == 'settlement' %} btn-outline-success {% elif item.status == 'pending' %} btn-outline-warning {% else %} btn-outline-danger {% endif %} btn-sm">{{ item.status }}</strong>
+                                    <button type="button" onclick="consumeData('{{ item.unique_code }}')" class="btn btn-light fa fa-ellipsis-v" style="color: grey;" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></button>
+                                </div>
+                            </div>
+                        </div>
+                      <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-3 col-lg-1">
+                                    <img class="img-fluid" src="{{ item.product__image }}" alt="{{ item.product__name }}" id="product-detail">
+                                </div>
+                                <div class="col-9">
+                                    <h5 id="{{item.unique_code}}-product__name" class="card-title">{{ item.product__name }}</h5>
+                                    <p class="card-subtitle mb-0 mb-lg-2 text-muted">Size {{ item.product__size__name }}</p>
+                                    <p id="{{item.unique_code}}-quantity" class="card-subtitle mb-0 mb-lg-2 text-muted">{{ item.quantity }} Items</p>
+                                    <input type="hidden" id="{{item.unique_code}}-short_unique_code" value="{{ item.short_unique_code }}">
+                                    <input type="hidden" id="{{item.unique_code}}-product__brand__name" value="{{ item.product__brand__name }}">
+                                    <input type="hidden" id="{{item.unique_code}}-product__category__name" value="{{ item.product__category__name }}">
+                                    <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.transaction_time }}">
+                                    <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
+                                    <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment_type }}">
+                                </div>
+                            </div>
+                      </div>
+                      <div class="card-footer">
+                        <div class="row align-items-center">
+                            <div class="col-8 col-lg-9 d-grid">
+                                <strong>Total Belanja <b>Rp. {{ item.gross_amount }}</b></strong>
+                            </div>
+                            <form method="POST" class="col-4 col-lg-3 d-grid">
+                                {% csrf_token %}
+                                <input type="hidden" name="order_id" value="{{ item.unique_code }}">
+                                {% if item.status == 'settlement' %}
+                                <button type="submit" name="buy" class="btn btn-success">Refund</button>
+                                {% else %}
+                                <button type="button" class="btn btn-dark" disabled>Can't Refund</button>
+                                {% endif %}
+                            </form>
+
+                        </div>
+                      </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+            <!-- Modal Detail -->
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="">Details Purchase</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body m-2">
+                      <table class="table table-borderless">
+                          <tbody>
+                            <tr>
+                                <td>Order ID</td>
+                                <td id="order_id"></td>
+                            </tr>
+                            <tr>
+                                <td>Product</td>
+                                <td id="product_name"></td>
+                            </tr>
+                            <tr>
+                                <td>Brand</td>
+                                <td id="brand_name"></td>
+                            </tr>
+                            <tr>
+                                <td>Type</td>
+                                <td id="category_name"></td>
+                            </tr>
+                            <tr>
+                                <td>Items</td>
+                                <td id="items"></td>
+                            </tr>
+                            <tr>
+                                <td>Price</td>
+                                <td id="price"></td>
+                            </tr>
+<!--                            <tr>-->
+<!--                                <td>Address</td>-->
+<!--                                <td>Jl Jend Sudirman, Sedanau, Natuna Natuna, 29779 Indonesia</td>-->
+<!--                            </tr>-->
+                            <tr>
+                                <td>Transaction Time</td>
+                                <td id="transaction_time"></td>
+                            </tr>
+                            <tr>
+                                <td>Payment Type</td>
+                                <td id="payment_type"></td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td id="status_modal"></td>
+                            </tr>
+
+                          </tbody>
+                      </table>
+                  </div>
+                  <div class="modal-footer">
+                      <form action="" method="GET">
+                          <input type="hidden" name="product_name" id="buy_again_product">
+                          <button type="submit" class="btn btn-success">buy again</button>
+                      </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Modal Detail -->
+        </div>
+    </section>
 {% endblock %}
+{% block javascripts %}
+<script>
+function consumeData(id) {
+
+    short_unique_code = document.getElementById(id+"-short_unique_code").value;
+    product__brand__name = document.getElementById(id+"-product__brand__name").value;
+    status_text = document.getElementById(id+"-status").innerText;
+    product_name = document.getElementById(id+"-product__name").innerText;
+    quantity = document.getElementById(id+"-quantity").innerText;
+    product__category__name = document.getElementById(id+"-product__category__name").value;
+    transaction_time = document.getElementById(id+"-transaction_time").value;
+    product__price = document.getElementById(id+"-product__price").value;
+    payment_type = document.getElementById(id+"-payment_type").value;
+
+
+    // alert(status_text)
+    document.getElementById("buy_again_product").value = product_name;
+    document.getElementById('order_id').innerHTML = short_unique_code;
+    document.getElementById('product_name').innerHTML = product_name;
+    document.getElementById('brand_name').innerHTML = product__brand__name;
+    document.getElementById('category_name').innerHTML = product__category__name;
+    document.getElementById('items').innerHTML = quantity;
+    document.getElementById('price').innerHTML = product__price;
+    document.getElementById('transaction_time').innerHTML = transaction_time;
+    document.getElementById('payment_type').innerHTML = payment_type;
+    document.getElementById('status_modal').innerHTML = status_text;
+
+}
+</script>
+{% endblock javascripts %}

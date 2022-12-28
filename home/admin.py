@@ -74,7 +74,7 @@ class CartAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("order_id", "product", "user", "unique_code",
+    list_display = ("order_id", "product", "quantity", "user", "unique_code",
                     "created_at", "updated_at", "gross_amount", "status")
 
 
