@@ -30,14 +30,14 @@ class ProvinceAdmin(admin.ModelAdmin):
 
 @admin.register(Cities)
 class CitiesAdmin(admin.ModelAdmin):
-    list_display = ("city_id", "province", "city_name",
-                    "postal_code", "type")
+    list_display = ("city_id", "province", "address", "city_name",
+                    "postal_code")
 
 
 @admin.register(Shipment)
 class ShipmentAdmin(admin.ModelAdmin):
-    list_display = ("shipment_id", "user", "city",
-                    "courier")
+    list_display = ("shipment_id", "product_order",
+                    "user", "city", "courier")
 
 
 @admin.register(Products)

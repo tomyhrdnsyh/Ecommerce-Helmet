@@ -9,6 +9,7 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 import midtransclient
 import uuid
+from itertools import chain
 
 # Create your views here.
 SIZE_DICT = {'S': 'Small', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
@@ -28,6 +29,26 @@ def index(request):
         update_status_order.status = request.GET.get('transaction_status')
         update_status_order.updated_at = datetime.now()
         update_status_order.save()
+
+    #
+    #  ------------------ Categori ------------------
+    half_face = Products.objects.filter(category=2).values('name', 'image', 'category__name')[:1]
+    full_face = Products.objects.filter(category=1).values('name', 'image', 'category__name')[:2]
+
+    product_category = list(chain(half_face, full_face))
+
+    context['product_category'] = product_category
+
+    #  ------------------ End Categori ------------------
+
+    #  ------------------ Featured ------------------
+    featured = Products.objects.values('name', 'price',
+                                       'desc', 'image')[:3]
+    for item in featured:
+        item['price'] = f"{int(item['price']):,}"
+
+    context['featured'] = featured
+    #  ------------------ End Featured ------------------
 
     html_template = loader.get_template('index.html')
     return HttpResponse(html_template.render(context, request))
@@ -199,6 +220,7 @@ def pages(request):
             transaction = get_midtrans(request, order_id=unique_code)
             # status_response = api_client.transactions.notification(mock_notification)
             # ---------- end midtrans ----------
+
             # ------------ save to order model ------------
             save_order = Order(
                 product=Products.objects.get(product_id=request.POST.get('product-id')),
@@ -211,6 +233,28 @@ def pages(request):
             )
             save_order.save()
             # ------------ end save ------------
+
+            # ------------ save to Province and Cities model ------------
+            province_obj, created = Province.objects.get_or_create(
+                province_name=request.POST.get('province')
+            )
+
+            cities_obj = Cities.objects.create(
+                city_name=request.POST.get('city'),
+                postal_code=request.POST.get('zipcode'),
+                address=request.POST.get('address'),
+                province=province_obj
+            )
+            # ------------ end Province and Cities ------------
+
+            # ------------ save to Shipment model ------------
+            Shipment.objects.create(
+                user=request.user,
+                city=cities_obj,
+                courier='Fikri Ulil'
+            )
+            # ------------ end save ------------
+
             # ------------ delete cart ------------
             if request.POST.get('cart-id'):
                 delete_cart = Cart.objects.get(cart_id=request.POST.get('cart-id'))
@@ -238,12 +282,26 @@ def pages(request):
             client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
         )
 
+<<<<<<< HEAD
         unique_code = Order.objects.filter(
             user=request.user).order_by('-order_id').values('unique_code', 'product__name', 'quantity',
                                                             'gross_amount', 'product__image', 'product__price',
                                                             'product__brand__name', 'status', 'product__size__name',
                                                             'product__category__name', 'refundproduct__order')
 
+=======
+        unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code',
+                                                                                           'product__name', 'quantity',
+                                                                                           'gross_amount',
+                                                                                           'product__image',
+                                                                                           'product__price',
+                                                                                           'product__brand__name',
+                                                                                           'status',
+                                                                                           'product__size__name',
+                                                                                           'product__category__name',
+                                                                                           'shipment__city__address')
+        output = []
+>>>>>>> 0c19040c6029a1be5a188711d054632bed65d4f7
         for item in unique_code:
             try:
                 status_response = api_client.transactions.status(item['unique_code'])
@@ -512,7 +570,7 @@ def get_midtrans(request, order_id):
             "recipient_name": "SUDARSONO"
         },
         "callbacks": {
-            "finish": "http://192.168.0.103:8001/"
+            "finish": "http://127.0.0.1:8000/profile.html"
         },
         "expiry": {
             "start_time": str(datetime.now().replace(microsecond=0)) + "+0700",
