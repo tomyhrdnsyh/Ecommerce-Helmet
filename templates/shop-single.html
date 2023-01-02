@@ -64,14 +64,6 @@
                         <div class="card-body">
                             <h1 class="h2">{{ name }}</h1>
                             <p class="h3 py-2">Rp. {{ price }}</p>
-                            <p class="py-2">
-                                <i class="fa fa-star text-warning"></i>
-                                <i class="fa fa-star text-warning"></i>
-                                <i class="fa fa-star text-warning"></i>
-                                <i class="fa fa-star text-warning"></i>
-                                <i class="fa fa-star text-secondary"></i>
-                                <span class="list-inline-item text-dark">Rating 4.8 | 36 Comments</span>
-                            </p>
                             <ul class="list-inline">
                                 <li class="list-inline-item">
                                     <h6>Brand:</h6>
@@ -110,7 +102,7 @@
                                                 <input type="hidden" name="product-size" value="{{ item.size }}">
                                             </li>
                                             <li class="list-inline-item">
-                                                <a href="/shop-single.html?name={{ name }}&size={{ item.size }}"><span>{{ item.size }}</span></a>
+                                                <a href="/shop-single.html?name={{ name }}&size={{ item.size }}"><span class="btn btn-success">{{ item.size }}</span></a>
                                             </li>
 <!--                                            <li class="list-inline-item"><a href="/shop-single.html?size={{ item.name }}" class="btn btn-success btn-size">{{ item.name }}</a></li>-->
                                             {% endfor %}
@@ -133,7 +125,6 @@
                                 <div class="row pb-3">
 
                                     {% if 's/d' in price %}
-
                                     <div class="col d-grid">
                                         <button type="button" class="btn btn-success btn-lg" id="buyTrigger">Buy</button>
                                     </div>
@@ -177,7 +168,6 @@
                             <img class="card-img rounded-0 img-fluid" src="{{ item.image }}">
                             <div class="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                 <ul class="list-unstyled">
-                                    <li><a class="btn btn-success text-white" href="shop-single.html"><i class="far fa-heart"></i></a></li>
                                     <li><a class="btn btn-success text-white mt-2" href="shop-single.html?name={{ item.name }}"><i class="far fa-eye"></i></a></li>
                                     <li><a class="btn btn-success text-white mt-2" href="shop-single.html"><i class="fas fa-cart-plus"></i></a></li>
                                 </ul>
@@ -185,7 +175,7 @@
                         </div>
                         <div class="card-body">
                             <a href="shop-single.html" class="h3 text-decoration-none">{{ item.name }}</a>
-                            <ul class="w-100 list-unstyled d-flex justify-content-between mb-0">
+                            <ul class="w-100 list-unstyled d-flex justify-content-between mb-3">
                                 <li>{{ item.size }}</li>
                                 <li class="pt-2">
                                     <span class="product-color-dot color-dot-red float-left rounded-circle ml-1"></span>
@@ -193,15 +183,6 @@
                                     <span class="product-color-dot color-dot-black float-left rounded-circle ml-1"></span>
                                     <span class="product-color-dot color-dot-light float-left rounded-circle ml-1"></span>
                                     <span class="product-color-dot color-dot-green float-left rounded-circle ml-1"></span>
-                                </li>
-                            </ul>
-                            <ul class="list-unstyled d-flex justify-content-center mb-1">
-                                <li>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-warning fa fa-star"></i>
-                                    <i class="text-muted fa fa-star"></i>
                                 </li>
                             </ul>
                             <p class="text-center mb-0">Rp. {{ item.price }}</p>

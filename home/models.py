@@ -5,7 +5,6 @@ from datetime import datetime
 
 
 class CustomUser(AbstractUser):
-
     user_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=100, null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -29,7 +28,7 @@ class Cities(models.Model):
     city_name = models.CharField(max_length=100, null=True)
     postal_code = models.CharField(max_length=15, null=True)
     type = models.CharField(max_length=50, null=True)
-    province = models.ForeignKey(Province,  on_delete=models.CASCADE)
+    province = models.ForeignKey(Province, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.city_name
@@ -164,3 +163,13 @@ class ProductPurchases(models.Model):
 
     class Meta:
         verbose_name_plural = 'Product Purchases'
+
+
+class RefundProduct(models.Model):
+    refund_id = models.AutoField(primary_key=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
+    price = models.IntegerField(null=True)
+    reason = models.CharField(max_length=250)
+
+    def __str__(self):
+        return str(self.order)

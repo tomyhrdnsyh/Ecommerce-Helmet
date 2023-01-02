@@ -10,6 +10,14 @@
 {% block content %}
     <section class="bg-light">
         <div class="container pb-5">
+            {% if not profile_detail %}
+            <div class="row text-center pt-5">
+                <div class="col-12">
+                    <p class="h4">you have no shopping history</p>
+                    <a href="shop.html" class="btn btn-success mt-3">Shop Now</a>
+                </div>
+            </div>
+            {% else %}
             {% for item in profile_detail %}
             <div class="row">
                 <div class="col-lg-12 {% if forloop.first %} mt-5 {% else %} mt-3 {% endif %}">
@@ -20,7 +28,7 @@
                                     <strong><i class="fa fa-shopping-cart" style="color: grey;"></i> Belanja</strong>
                                 </div>
                                 <div class="col-9 text-end">
-                                    <strong id="{{item.unique_code}}-status" class="btn {% if item.status == 'settlement' %} btn-outline-success {% elif item.status == 'pending' %} btn-outline-warning {% else %} btn-outline-danger {% endif %} btn-sm">{{ item.status }}</strong>
+                                    <strong id="{{item.unique_code}}-status" class="btn {% if item.status == 'settlement' %} btn-outline-success {% elif item.status == 'pending' %} btn-outline-warning {% elif item.status == 'refunded' %} btn-outline-dark {% else %} btn-outline-danger {% endif %} btn-sm">{{ item.status }}</strong>
                                     <button type="button" onclick="consumeData('{{ item.unique_code }}')" class="btn btn-light fa fa-ellipsis-v" style="color: grey;" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></button>
                                 </div>
                             </div>
@@ -46,15 +54,15 @@
                       <div class="card-footer">
                         <div class="row align-items-center">
                             <div class="col-8 col-lg-9 d-grid">
-                                <strong>Total Belanja <b>Rp. {{ item.gross_amount }}</b></strong>
+                                <strong>Total <b>Rp. {{ item.gross_amount }}</b></strong>
                             </div>
                             <form method="POST" class="col-4 col-lg-3 d-grid">
                                 {% csrf_token %}
                                 <input type="hidden" name="order_id" value="{{ item.unique_code }}">
                                 {% if item.status == 'settlement' %}
-                                <button type="submit" name="buy" class="btn btn-success">Refund</button>
+                                <button type="button" onclick="refund('{{ item.unique_code }}')" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#refundModal">Refund</button>
                                 {% else %}
-                                <button type="button" class="btn btn-dark" disabled>Can't Refund</button>
+                                <button type="button" class="btn btn-success" disabled>Refund</button>
                                 {% endif %}
                             </form>
 
@@ -65,6 +73,7 @@
                 </div>
             </div>
             {% endfor %}
+            {% endif %}
             <!-- Modal Detail -->
             <!-- Modal -->
             <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -131,6 +140,30 @@
               </div>
             </div>
             <!-- End Modal Detail -->
+
+            <!-- modal refund -->
+            <div class="modal fade" id="refundModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Refund Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form class="form" method="POST">
+                  {% csrf_token %}
+                  <div class="modal-body m-2">
+                      <input type="hidden" name="id_refund" id="id_refund">
+                      <input type="hidden" name="price_refund" id="price_refund">
+                      <textarea rows="3" name="reason" placeholder="Reason" class="form-control"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="submit" name="refund" class="btn btn-dark">refund</button>
+                  </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- end modal refund -->
         </div>
     </section>
 {% endblock %}
@@ -161,6 +194,12 @@ function consumeData(id) {
     document.getElementById('payment_type').innerHTML = payment_type;
     document.getElementById('status_modal').innerHTML = status_text;
 
+}
+
+function refund(id) {
+    product__price = document.getElementById(id+"-product__price").value;
+    document.getElementById("id_refund").value = id;
+    document.getElementById("price_refund").value = product__price;
 }
 </script>
 {% endblock javascripts %}

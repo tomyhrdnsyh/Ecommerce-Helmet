@@ -6,7 +6,14 @@
 
 <section class="bg-light">
         <div class="container pb-5">
-
+            {% if not cart_info %}
+            <div class="row text-center pt-5">
+                <div class="col-12">
+                    <p class="h4">You have no items in your shopping cart</p>
+                    <a href="shop.html" class="btn btn-success mt-3">Shop Now</a>
+                </div>
+            </div>
+            {% else %}
             {% for item in cart_info %}
             <div class="row">
                 <div class="col-lg-12 {% if forloop.first %} mt-5 {% else %} mt-3 {% endif %}">
@@ -51,7 +58,7 @@
                 </div>
             </div>
             {% endfor %}
-
+            {% endif %}
         </div>
     </section>
 

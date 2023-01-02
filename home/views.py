@@ -50,6 +50,10 @@ def pages(request):
         list_product = query_get_product(param=request.GET.get('q'))
         context['list_product'] = list_product
         load_template = 'shop.html'
+
+        context['segment'] = load_template
+        html_template = loader.get_template(load_template)
+        return HttpResponse(html_template.render(context, request))
     # ====== end check ======
 
     # ====== SHOP MENU ======
@@ -121,7 +125,11 @@ def pages(request):
                         context.update(item_shop_single(raw_detail_filter_size))
 
         if request.POST:
+            if not request.user.is_authenticated:
+                return login_sek(request)
+
             if request.POST.get('buy'):
+
                 request.session['id'] = request.POST.get('product_id')
                 request.session['name'] = request.POST.get('product-title')
                 request.session['img'] = request.POST.get('product-img')
@@ -132,7 +140,6 @@ def pages(request):
                     request.POST.get('product-price').replace(',', ''))
                 request.session['total'] = f'{total:,}'
                 return redirect('/checkout.html')
-
             else:
                 product_id = request.POST.get('product_id')
                 try:
@@ -152,8 +159,7 @@ def pages(request):
     # ====== cart ======
     if load_template == 'cart.html':
         if not request.user.is_authenticated:
-            messages.info(request, 'You must login first for use this feature!')
-            return redirect('login')
+            return login_sek(request)
 
         cart = Cart.objects.filter(user=request.user).values('cart_id', 'product__name', 'product',
                                                              'product__price', 'product__image',
@@ -221,6 +227,9 @@ def pages(request):
 
     # ====================== Profile ====================
     if load_template == 'profile.html':
+        if not request.user.is_authenticated:
+            return login_sek(request)
+
         # update status every load this page
 
         api_client = midtransclient.CoreApi(
@@ -229,31 +238,37 @@ def pages(request):
             client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
         )
 
-        unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code', 'product__name', 'quantity',
-                                                                     'gross_amount', 'product__image', 'product__price',
-                                                                     'product__brand__name', 'status',
-                                                                     'product__size__name', 'product__category__name')
-        output = []
+        unique_code = Order.objects.filter(
+            user=request.user).order_by('-order_id').values('unique_code', 'product__name', 'quantity',
+                                                            'gross_amount', 'product__image', 'product__price',
+                                                            'product__brand__name', 'status', 'product__size__name',
+                                                            'product__category__name', 'refundproduct__order')
+
         for item in unique_code:
             try:
                 status_response = api_client.transactions.status(item['unique_code'])
-                update_order = Order.objects.get(unique_code=item['unique_code'])
-                update_order.status = status_response.get('transaction_status')
-                update_order.save()
-
-                obj, created = Payment.objects.update_or_create(
-                    order=Order.objects.get(unique_code=item['unique_code']),
-                    defaults={
-                        'transaction_time': status_response.get('transaction_time'),
-                        'gross_amount': int(status_response.get('gross_amount').replace('.00', '')),
-                        'payment_type': status_response.get('payment_type')
-                    }
-                )
-
             except Exception as e:
                 err = e
 
             else:
+                # update status base on midtrans
+
+                if item['status'] == 'pending':
+
+                    update_order = Order.objects.get(unique_code=item['unique_code'])
+                    update_order.status = status_response.get('transaction_status')
+                    update_order.save()
+
+                    # update or create transaction payment on model
+                    obj, created = Payment.objects.update_or_create(
+                        order=Order.objects.get(unique_code=item['unique_code']),
+                        defaults={
+                            'transaction_time': status_response.get('transaction_time'),
+                            'gross_amount': int(status_response.get('gross_amount').replace('.00', '')),
+                            'payment_type': status_response.get('payment_type')
+                        }
+                    )
+
                 item['gross_amount'] = f"{item['gross_amount']:,}"
                 item['short_unique_code'] = item['unique_code'][:8] + "..."
                 item['transaction_time'] = status_response['transaction_time']
@@ -268,6 +283,28 @@ def pages(request):
             list_product = query_get_product(param=product_name)
             context['list_product'] = list_product
             load_template = 'shop.html'
+
+        # ------------- refund product --------------
+        # refund a transaction (not all payment channel allow refund via API)
+        if 'refund' in request.POST:
+            unique_code = request.POST.get('id_refund')
+            price = request.POST.get('price_refund').replace(',', '')
+            reason = request.POST.get('reason')
+
+            try:
+                order = Order.objects.get(unique_code=unique_code)
+                refund = RefundProduct(
+                    order=order,
+                    price=price,
+                    reason=reason,
+                )
+            except Exception as e:
+                err = e
+            else:
+                refund.save()
+                order.status = 'refunded'
+                order.save()
+            return redirect('/profile.html')
 
     context['segment'] = load_template
     html_template = loader.get_template(load_template)
@@ -486,5 +523,10 @@ def get_midtrans(request, order_id):
     # create transaction
     transaction = snap.create_transaction(param)
     return transaction
+
+
+def login_sek(request):
+    messages.info(request, 'You must login first for use this feature!')
+    return redirect('login')
 
 # -------------------------- end function preprocessing data --------------------------

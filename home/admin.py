@@ -88,3 +88,8 @@ class PaymentAdmin(admin.ModelAdmin):
 class ProductPurchasesAdmin(admin.ModelAdmin):
     list_display = ("product_purchases_id", "user", "product",
                     "supplier", "stock", "date", "status")
+
+
+@admin.register(RefundProduct)
+class RefundProductAdmin(admin.ModelAdmin):
+    list_display = ("refund_id", "order", "price", "reason")
