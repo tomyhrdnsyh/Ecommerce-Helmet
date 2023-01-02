@@ -28,7 +28,7 @@ class Cities(models.Model):
     city_id = models.AutoField(primary_key=True)
     city_name = models.CharField(max_length=100, null=True)
     postal_code = models.CharField(max_length=15, null=True)
-    type = models.CharField(max_length=50, null=True)
+    address = models.CharField(max_length=50, null=True)
     province = models.ForeignKey(Province,  on_delete=models.CASCADE)
 
     def __str__(self):

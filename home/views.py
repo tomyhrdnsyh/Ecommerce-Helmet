@@ -193,6 +193,7 @@ def pages(request):
             transaction = get_midtrans(request, order_id=unique_code)
             # status_response = api_client.transactions.notification(mock_notification)
             # ---------- end midtrans ----------
+
             # ------------ save to order model ------------
             save_order = Order(
                 product=Products.objects.get(product_id=request.POST.get('product-id')),
@@ -205,6 +206,28 @@ def pages(request):
             )
             save_order.save()
             # ------------ end save ------------
+
+            # ------------ save to Province and Cities model ------------
+            province_obj, created = Province.objects.get_or_create(
+                province_name=request.POST.get('province')
+            )
+
+            cities_obj = Cities.objects.create(
+                city_name=request.POST.get('city'),
+                postal_code=request.POST.get('zipcode'),
+                address=request.POST.get('address'),
+                province=province_obj
+            )
+            # ------------ end Province and Cities ------------
+
+            # ------------ save to Shipment model ------------
+            Shipment.objects.create(
+                user=request.user,
+                city=cities_obj,
+                courier='Fikri Ulil'
+            )
+            # ------------ end save ------------
+
             # ------------ delete cart ------------
             if request.POST.get('cart-id'):
                 delete_cart = Cart.objects.get(cart_id=request.POST.get('cart-id'))
