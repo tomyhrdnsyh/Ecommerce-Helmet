@@ -282,14 +282,12 @@ def pages(request):
             client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
         )
 
-<<<<<<< HEAD
         unique_code = Order.objects.filter(
             user=request.user).order_by('-order_id').values('unique_code', 'product__name', 'quantity',
                                                             'gross_amount', 'product__image', 'product__price',
                                                             'product__brand__name', 'status', 'product__size__name',
                                                             'product__category__name', 'refundproduct__order')
 
-=======
         unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code',
                                                                                            'product__name', 'quantity',
                                                                                            'gross_amount',
@@ -300,8 +298,6 @@ def pages(request):
                                                                                            'product__size__name',
                                                                                            'product__category__name',
                                                                                            'shipment__city__address')
-        output = []
->>>>>>> 0c19040c6029a1be5a188711d054632bed65d4f7
         for item in unique_code:
             try:
                 status_response = api_client.transactions.status(item['unique_code'])
