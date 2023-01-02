@@ -50,6 +50,17 @@ def index(request):
     context['featured'] = featured
     #  ------------------ End Featured ------------------
 
+    #  ------------------ if any Search ------------------
+    if request.GET.get('q'):
+        list_product = query_get_product(param=request.GET.get('q'))
+        context['list_product'] = list_product
+        load_template = 'shop.html'
+
+        context['segment'] = load_template
+        html_template = loader.get_template(load_template)
+        return HttpResponse(html_template.render(context, request))
+    #  ------------------ end Search ------------------
+
     html_template = loader.get_template('index.html')
     return HttpResponse(html_template.render(context, request))
 
@@ -105,7 +116,7 @@ def pages(request):
             # === insert product to cart model ===
             product_id = request.GET.get('product_id')
             try:
-                cart = Cart.objects.get(product=product_id)
+                cart = Cart.objects.get(product=product_id, user=request.user)
                 update_cart_model(req=request, cart=cart, product=Products.objects.get(product_id=product_id))
                 msg = 'Cart update success!'
             except Cart.DoesNotExist:
@@ -164,7 +175,7 @@ def pages(request):
             else:
                 product_id = request.POST.get('product_id')
                 try:
-                    cart = Cart.objects.get(product=product_id)
+                    cart = Cart.objects.get(product=product_id, user=request.user)
                     update_cart_model(req=request, cart=cart, product=Products.objects.get(product_id=product_id))
                     msg = 'Cart update success!'
                 except Cart.DoesNotExist:
@@ -221,25 +232,31 @@ def pages(request):
             # status_response = api_client.transactions.notification(mock_notification)
             # ---------- end midtrans ----------
 
+            product = Products.objects.get(product_id=request.POST.get('product-id'))
             # ------------ save to order model ------------
             save_order = Order(
-                product=Products.objects.get(product_id=request.POST.get('product-id')),
+                product=product,
                 user=request.user,
                 unique_code=unique_code,
                 quantity=request.POST.get('product-qty'),
                 gross_amount=int(request.POST.get('product-total').replace(',', '')),
                 updated_at=datetime.now(),
-                status='Pending'
+                status='pending'
             )
             save_order.save()
             # ------------ end save ------------
+
+            # ------------ update stock product ------------
+            product.stock = product.stock - int(request.POST.get('product-qty'))
+            product.save()
+            # ------------ end update stock product ------------
 
             # ------------ save to Province and Cities model ------------
             province_obj, created = Province.objects.get_or_create(
                 province_name=request.POST.get('province')
             )
 
-            cities_obj = Cities.objects.create(
+            cities_obj, created = Cities.objects.get_or_create(
                 city_name=request.POST.get('city'),
                 postal_code=request.POST.get('zipcode'),
                 address=request.POST.get('address'),
@@ -251,6 +268,7 @@ def pages(request):
             Shipment.objects.create(
                 user=request.user,
                 city=cities_obj,
+                product_order=save_order,
                 courier='Fikri Ulil'
             )
             # ------------ end save ------------
@@ -566,7 +584,7 @@ def get_midtrans(request, order_id):
             "recipient_name": "SUDARSONO"
         },
         "callbacks": {
-            "finish": "http://127.0.0.1:8000/profile.html"
+            "finish": "http://127.0.0.1:8000/shop.html"
         },
         "expiry": {
             "start_time": str(datetime.now().replace(microsecond=0)) + "+0700",

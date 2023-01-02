@@ -27,13 +27,8 @@ class Cities(models.Model):
     city_id = models.AutoField(primary_key=True)
     city_name = models.CharField(max_length=100, null=True)
     postal_code = models.CharField(max_length=15, null=True)
-<<<<<<< HEAD
-    type = models.CharField(max_length=50, null=True)
     province = models.ForeignKey(Province, on_delete=models.CASCADE)
-=======
     address = models.CharField(max_length=50, null=True)
-    province = models.ForeignKey(Province,  on_delete=models.CASCADE)
->>>>>>> 0c19040c6029a1be5a188711d054632bed65d4f7
 
     def __str__(self):
         return self.city_name
@@ -160,7 +155,6 @@ class ProductPurchases(models.Model):
         verbose_name_plural = 'Product Purchases'
 
 
-<<<<<<< HEAD
 class RefundProduct(models.Model):
     refund_id = models.AutoField(primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
@@ -169,7 +163,8 @@ class RefundProduct(models.Model):
 
     def __str__(self):
         return str(self.order)
-=======
+
+
 class Shipment(models.Model):
     shipment_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -181,4 +176,3 @@ class Shipment(models.Model):
 
     def __str__(self):
         return self.courier
->>>>>>> 0c19040c6029a1be5a188711d054632bed65d4f7
