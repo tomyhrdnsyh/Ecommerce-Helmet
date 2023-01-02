@@ -40,6 +40,7 @@
                                     <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.transaction_time }}">
                                     <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
                                     <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment_type }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city__address }}">
                                 </div>
                             </div>
                       </div>
@@ -101,10 +102,10 @@
                                 <td>Price</td>
                                 <td id="price"></td>
                             </tr>
-<!--                            <tr>-->
-<!--                                <td>Address</td>-->
-<!--                                <td>Jl Jend Sudirman, Sedanau, Natuna Natuna, 29779 Indonesia</td>-->
-<!--                            </tr>-->
+                            <tr>
+                                <td>Address</td>
+                                <td id="address"></td>
+                            </tr>
                             <tr>
                                 <td>Transaction Time</td>
                                 <td id="transaction_time"></td>
@@ -147,6 +148,7 @@ function consumeData(id) {
     transaction_time = document.getElementById(id+"-transaction_time").value;
     product__price = document.getElementById(id+"-product__price").value;
     payment_type = document.getElementById(id+"-payment_type").value;
+    address = document.getElementById(id+"-shipment__city__address").value;
 
 
     // alert(status_text)
@@ -159,6 +161,7 @@ function consumeData(id) {
     document.getElementById('price').innerHTML = product__price;
     document.getElementById('transaction_time').innerHTML = transaction_time;
     document.getElementById('payment_type').innerHTML = payment_type;
+    document.getElementById('address').innerHTML = address;
     document.getElementById('status_modal').innerHTML = status_text;
 
 }

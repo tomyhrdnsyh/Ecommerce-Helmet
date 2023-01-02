@@ -38,16 +38,6 @@ class Cities(models.Model):
         verbose_name_plural = 'Cities'
 
 
-class Shipment(models.Model):
-    shipment_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    city = models.ForeignKey(Cities, on_delete=models.CASCADE)
-    courier = models.CharField(max_length=100, null=True)
-
-    def __str__(self):
-        return self.courier
-
-
 class Categories(models.Model):
     category_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -164,3 +154,16 @@ class ProductPurchases(models.Model):
 
     class Meta:
         verbose_name_plural = 'Product Purchases'
+
+
+class Shipment(models.Model):
+    shipment_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    city = models.ForeignKey(Cities, on_delete=models.SET_NULL,
+                             null=True, blank=True)
+    product_order = models.ForeignKey(Order, on_delete=models.CASCADE,
+                                      null=True)
+    courier = models.CharField(max_length=100, null=True)
+
+    def __str__(self):
+        return self.courier

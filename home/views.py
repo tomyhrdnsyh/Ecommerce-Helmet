@@ -9,6 +9,7 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 import midtransclient
 import uuid
+from itertools import chain
 
 # Create your views here.
 SIZE_DICT = {'S': 'Small', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
@@ -28,6 +29,17 @@ def index(request):
         update_status_order.status = request.GET.get('transaction_status')
         update_status_order.updated_at = datetime.now()
         update_status_order.save()
+
+    #
+    #  ------------------ Categori ------------------
+    half_face = Products.objects.filter(category=2).values('name', 'image', 'category__name')[:1]
+    full_face = Products.objects.filter(category=1).values('name', 'image', 'category__name')[:2]
+
+    product_category = list(chain(half_face, full_face))
+
+    context['product_category'] = product_category
+
+    #  ------------------ End Categori ------------------
 
     html_template = loader.get_template('index.html')
     return HttpResponse(html_template.render(context, request))
@@ -252,10 +264,16 @@ def pages(request):
             client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
         )
 
-        unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code', 'product__name', 'quantity',
-                                                                     'gross_amount', 'product__image', 'product__price',
-                                                                     'product__brand__name', 'status',
-                                                                     'product__size__name', 'product__category__name')
+        unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code',
+                                                                                           'product__name', 'quantity',
+                                                                                           'gross_amount',
+                                                                                           'product__image',
+                                                                                           'product__price',
+                                                                                           'product__brand__name',
+                                                                                           'status',
+                                                                                           'product__size__name',
+                                                                                           'product__category__name',
+                                                                                           'shipment__city__address')
         output = []
         for item in unique_code:
             try:
@@ -498,7 +516,7 @@ def get_midtrans(request, order_id):
             "recipient_name": "SUDARSONO"
         },
         "callbacks": {
-            "finish": "http://192.168.0.103:8001/"
+            "finish": "http://127.0.0.1:8000/profile.html"
         },
         "expiry": {
             "start_time": str(datetime.now().replace(microsecond=0)) + "+0700",
