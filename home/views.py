@@ -41,6 +41,15 @@ def index(request):
 
     #  ------------------ End Categori ------------------
 
+    #  ------------------ Featured ------------------
+    featured = Products.objects.values('name', 'price',
+                                       'desc', 'image')[:3]
+    for item in featured:
+        item['price'] = f"{int(item['price']):,}"
+
+    context['featured'] = featured
+    #  ------------------ End Featured ------------------
+
     html_template = loader.get_template('index.html')
     return HttpResponse(html_template.render(context, request))
 
