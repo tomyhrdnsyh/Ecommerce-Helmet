@@ -1,0 +1,12 @@
+{% extends "report/base_layout_report.html" %}
+
+{% block javascript %}
+<script>
+   window.onload = function() {
+        window.print();
+    }
+    setTimeout(function (){
+        window.location.replace('/admin/');
+    }, 1000)
+</script>
+{% endblock %}

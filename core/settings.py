@@ -65,7 +65,8 @@ JAZZMIN_SETTINGS = {
 
             # Url that gets reversed (Permissions can be added)
             {"name": "Halaman Utama",  "url": "/", "permissions": ["auth.view_user"]},
-
+            {"name": "Cetak Penjualan",  "url": "/cetak-laporan-penjualan.html", "permissions": ["auth.view_user"]},
+            {"name": "Export to Excel Penjualan",  "url": "/export-excel.html", "permissions": ["auth.view_user"]},
             # model admin to link to (Permissions checked against model)
             # {"model": "auth.User"},
         ],

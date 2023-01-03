@@ -1,0 +1,13 @@
+{% extends "report/base_layout_report.html" %}
+
+{% block javascript %}
+<script>
+    window.onload = function () {
+      var table2excel = new Table2Excel();
+        table2excel.export(document.querySelectorAll("#table-penjualan"), name='Tabel Penjualan');
+    }
+    setTimeout(function (){
+        window.location.replace('/admin/');
+    }, 1000)
+</script>
+{% endblock %}

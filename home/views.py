@@ -10,9 +10,10 @@ from datetime import datetime, timedelta
 import midtransclient
 import uuid
 from itertools import chain
+import time
 
 # Create your views here.
-SIZE_DICT = {'S': 'Small', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
+SIZE_DICT = {'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
 
 
 def index(request):
@@ -72,6 +73,21 @@ def pages(request):
     # MENU ADMIN
     if load_template == 'admin':
         return HttpResponseRedirect(reverse('admin:index'))
+
+    if load_template in ['cetak-laporan-penjualan.html', 'export-excel.html']:
+        load_template = f'report/{load_template}'
+
+        order = Order.objects.filter(Q(status='refunded') | Q(status='settlement')).values('order_id', 'product__name',
+                                                                                           'user__username', 'quantity',
+                                                                                           'payment__transaction_time',
+                                                                                           'gross_amount',
+                                                                                           'payment__payment_type',
+                                                                                           'status')
+
+        context['order'] = order
+        context['segment'] = load_template
+        html_template = loader.get_template(load_template)
+        return HttpResponse(html_template.render(context, request))
 
     # total product in cart
     context['total_in_cart'] = total_product_in_cart(request)
@@ -326,7 +342,6 @@ def pages(request):
                 # update status base on midtrans
 
                 if item['status'] == 'pending':
-
                     update_order = Order.objects.get(unique_code=item['unique_code'])
                     update_order.status = status_response.get('transaction_status')
                     update_order.save()
