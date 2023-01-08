@@ -172,7 +172,10 @@ class Shipment(models.Model):
                              null=True, blank=True)
     product_order = models.ForeignKey(Order, on_delete=models.CASCADE,
                                       null=True)
-    courier = models.CharField(max_length=100, null=True)
+    service = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    cost = models.IntegerField(null=True, blank=True)
+    etd = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.courier

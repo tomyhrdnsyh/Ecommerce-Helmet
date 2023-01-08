@@ -41,7 +41,8 @@ class CitiesAdmin(admin.ModelAdmin):
 @admin.register(Shipment)
 class ShipmentAdmin(admin.ModelAdmin):
     list_display = ("shipment_id", "product_order",
-                    "user", "city", "courier")
+                    "user", "city", "service",
+                    "description", "cost", "etd")
 
 
 @admin.register(Products)

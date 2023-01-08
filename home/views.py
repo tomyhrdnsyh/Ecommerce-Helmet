@@ -1,3 +1,5 @@
+import os.path
+
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -10,7 +12,8 @@ from datetime import datetime, timedelta
 import midtransclient
 import uuid
 from itertools import chain
-import time
+import json
+import requests
 
 # Create your views here.
 SIZE_DICT = {'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
@@ -242,9 +245,44 @@ def pages(request):
     if load_template == 'checkout.html':
         if request.POST:
             unique_code = uuid.uuid1()
+            # ---------- raja ongkir ----------
+
+            path = os.path.dirname(__file__)
+            with open(os.path.join(path, 'raja_ongkir_city/raja_ongkir_city.json')) as file:
+                city_data = json.load(file)
+
+            city = request.POST.get('city').lower()
+            province = request.POST.get('province').lower()
+
+            city_id = None
+            for item in city_data['rajaongkir']['results']:
+                if item.get('city_name').lower() == city and item.get('province').lower() == province:
+                    city_id = item.get('city_id')
+
+            service = None
+            description = None
+            cost = None
+            etd = None
+
+            if city_id:
+
+                header = {'key': '8dc52301d89f605294011c137f373561',
+                          'content-type': "application/x-www-form-urlencoded"}
+                payload = f"origin=501&destination={city_id}&weight=1700&courier=jne"
+
+                response_cost = requests.post('http://api.rajaongkir.com/starter/cost', data=payload, headers=header)
+                data = response_cost.json()
+                detail_data = data['rajaongkir']['results'][0]['costs'][1]
+                print(detail_data)
+                service = detail_data.get('service')
+                description = detail_data.get('description')
+                cost = detail_data['cost'][0].get('value')
+                etd = detail_data['cost'][0].get('etd')
+
+            # ---------- end raja ongkir ----------
 
             # ---------- sandbox midtrans ----------
-            transaction = get_midtrans(request, order_id=unique_code)
+            transaction = get_midtrans(request, cost, order_id=unique_code)
             # status_response = api_client.transactions.notification(mock_notification)
             # ---------- end midtrans ----------
 
@@ -285,7 +323,10 @@ def pages(request):
                 user=request.user,
                 city=cities_obj,
                 product_order=save_order,
-                courier='Fikri Ulil'
+                service=service,
+                description=description,
+                cost=cost,
+                etd=etd
             )
             # ------------ end save ------------
 
@@ -316,12 +357,6 @@ def pages(request):
             client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
         )
 
-        unique_code = Order.objects.filter(
-            user=request.user).order_by('-order_id').values('unique_code', 'product__name', 'quantity',
-                                                            'gross_amount', 'product__image', 'product__price',
-                                                            'product__brand__name', 'status', 'product__size__name',
-                                                            'product__category__name', 'refundproduct__order')
-
         unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code',
                                                                                            'product__name', 'quantity',
                                                                                            'gross_amount',
@@ -331,7 +366,11 @@ def pages(request):
                                                                                            'status',
                                                                                            'product__size__name',
                                                                                            'product__category__name',
-                                                                                           'shipment__city__address')
+                                                                                           'shipment__city__address',
+                                                                                           'shipment__service',
+                                                                                           'shipment__cost',
+                                                                                           'shipment__etd',
+                                                                                           )
         for item in unique_code:
             try:
                 status_response = api_client.transactions.status(item['unique_code'])
@@ -519,26 +558,39 @@ def total_product_buy(request):
     return 0
 
 
-def get_midtrans(request, order_id):
+def get_midtrans(request, cost, order_id):
     snap = midtransclient.Snap(
         is_production=False,
         server_key='SB-Mid-server-01NTFWb6l738KBzH0OWZuhks',
         client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
     )
 
+    cost = 0 if cost is None else cost
+
     param = {
         "transaction_details": {
             "order_id": f"{order_id}",
-            "gross_amount": int(request.POST.get('product-total').replace(',', ''))
-        }, "item_details": [{
-            "id": request.POST.get('product-id'),
-            "price": int(request.POST.get('product-price').replace(',', '')),
-            "quantity": request.POST.get('product-qty'),
-            "name": request.POST.get('product-name'),
-            "brand": request.POST.get('product-price'),
-            # "category": "Toys",
-            # "merchant_name": "Midtrans"
-        }],
+            "gross_amount": int(request.POST.get('product-total').replace(',', '')) + cost
+        }, "item_details": [
+            {
+                "id": request.POST.get('product-id'),
+                "price": int(request.POST.get('product-price').replace(',', '')),
+                "quantity": request.POST.get('product-qty'),
+                "name": request.POST.get('product-name'),
+                "brand": request.POST.get('product-price'),
+                # "category": "Toys",
+                # "merchant_name": "Midtrans"
+            },
+            {
+                "id": request.POST.get('product-id'),
+                "price": cost,
+                "quantity": request.POST.get('product-qty'),
+                "name": 'JNE REG Shipment Cost',
+                # "brand": request.POST.get('product-price'),
+                # "category": "Toys",
+                # "merchant_name": "Midtrans"
+            }
+        ],
         "customer_details": {
             "first_name": request.POST.get('name'),
             "email": request.POST.get('email'),

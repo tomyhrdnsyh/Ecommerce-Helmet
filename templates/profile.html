@@ -49,6 +49,9 @@
                                     <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
                                     <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment_type }}">
                                     <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city__address }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__service" value="{{ item.shipment__service }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__cost" value="{{ item.shipment__cost }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__etd" value="{{ item.shipment__etd }}">
                                 </div>
                             </div>
                       </div>
@@ -110,6 +113,18 @@
                             <tr>
                                 <td>Price</td>
                                 <td id="price"></td>
+                            </tr>
+                            <tr>
+                                <td>Service</td>
+                                <td id="service"></td>
+                            </tr>
+                            <tr>
+                                <td>Shipment Cost</td>
+                                <td id="cost"></td>
+                            </tr>
+                            <tr>
+                                <td>Estimation</td>
+                                <td id="estimation"></td>
                             </tr>
                             <tr>
                                 <td>Address</td>
@@ -182,6 +197,9 @@ function consumeData(id) {
     product__price = document.getElementById(id+"-product__price").value;
     payment_type = document.getElementById(id+"-payment_type").value;
     address = document.getElementById(id+"-shipment__city__address").value;
+    service = document.getElementById(id+"-shipment__service").value;
+    cost = document.getElementById(id+"-shipment__cost").value;
+    estimation = document.getElementById(id+"-shipment__etd").value;
 
 
     // alert(status_text)
@@ -196,6 +214,9 @@ function consumeData(id) {
     document.getElementById('payment_type').innerHTML = payment_type;
     document.getElementById('address').innerHTML = address;
     document.getElementById('status_modal').innerHTML = status_text;
+    document.getElementById('service').innerHTML = "JNE " + service;
+    document.getElementById('cost').innerHTML = cost;
+    document.getElementById('estimation').innerHTML = estimation + " day";
 
 }
 
