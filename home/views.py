@@ -621,27 +621,20 @@ def get_midtrans(request, cost, order_id):
                 "quantity": request.POST.get('product-qty'),
                 "name": request.POST.get('product-name'),
                 "brand": request.POST.get('product-price'),
-                # "category": "Toys",
-                # "merchant_name": "Midtrans"
             },
             {
                 "id": request.POST.get('product-id'),
                 "price": cost,
                 "quantity": request.POST.get('product-qty'),
                 "name": 'JNE REG Shipment Cost',
-                # "brand": request.POST.get('product-price'),
-                # "category": "Toys",
-                # "merchant_name": "Midtrans"
             }
         ],
         "customer_details": {
             "first_name": request.POST.get('name'),
             "email": request.POST.get('email'),
-            # "phone": "+628123456",
             "billing_address": {
                 "first_name": request.POST.get('name'),
                 "email": request.POST.get('email'),
-                # "phone": "081 2233 44-55",
                 "address": request.POST.get('address'),
                 "postal_code": request.POST.get('zipcode'),
                 "city": request.POST.get('city'),
@@ -651,7 +644,6 @@ def get_midtrans(request, cost, order_id):
             "shipping_address": {
                 "first_name": request.POST.get('name'),
                 "email": request.POST.get('email'),
-                # "phone": "0 8128-75 7-9338",
                 "address": request.POST.get('address'),
                 "postal_code": request.POST.get('zipcode'),
                 "city": request.POST.get('city'),
@@ -664,11 +656,6 @@ def get_midtrans(request, cost, order_id):
                              "bri_epay", "echannel", "indosat_dompetku", "mandiri_ecash", "permata_va",
                              "bca_va", "gopay",
                              "bni_va", "other_va", "kioson", "indomaret", "gci", "danamon_online"],
-        # "gopay_partner": {
-        #     "phone_number": "81234567891",
-        #     "country_code": "62",
-        #     "redirect_url": "https://mywebstore.com/gopay-linking-finish"  # please update with your redirect URL
-        # },
         "bca_va": {
             "va_number": "12345678911",
             "free_text": {
