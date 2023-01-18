@@ -1,0 +1,248 @@
+{% extends "layout/base.html" %}
+{% load static %}
+{% block title %} Product Detail {% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/slick.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/slick-theme.css' %}">
+{% endblock stylesheets %}
+
+{% block content %}
+    <section class="bg-light">
+        <div class="container pb-5">
+            {% if not profile_detail %}
+            <div class="row text-center pt-5">
+                <div class="col-12">
+                    <p class="h4">you have no shopping history</p>
+                    <a href="shop.html" class="btn btn-success mt-3">Shop Now</a>
+                </div>
+            </div>
+            {% else %}
+
+            <div class="row">
+                <div class="col-12 mt-4">
+                        <ul class="list-inline shop-top-menu p-3">
+                        <li class="list-inline-item">
+                            <a class="h3 text-dark text-decoration-none mr-3" href="/order.html">All</a>
+                        </li>
+                        {% for item in filter %}
+                        <li class="list-inline-item">
+                            <a class="h3 text-dark text-decoration-none mr-3" href="/order.html?filter={{ item }}">{{ item }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% for item in profile_detail %}
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card mt-2">
+                        <div class="card-header">
+                            <div class="row align-items-center">
+                                <div class="col-3">
+                                    <strong><i class="fa fa-shopping-cart" style="color: grey;"></i> Belanja</strong>
+                                </div>
+                                <div class="col-9 text-end">
+                                    <strong id="{{item.unique_code}}-status" class="btn {% if item.status == 'settlement' %} btn-outline-success {% elif item.status == 'pending' %} btn-outline-warning {% elif item.status == 'refunded' %} btn-outline-dark {% else %} btn-outline-danger {% endif %} btn-sm">{{ item.status }}</strong>
+                                    <button type="button" onclick="consumeData('{{ item.unique_code }}')" class="btn btn-light fa fa-ellipsis-v" style="color: grey;" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></button>
+                                </div>
+                            </div>
+                        </div>
+                      <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-3 col-lg-1">
+                                    <img class="img-fluid" src="{{ item.product__image }}" alt="{{ item.product__name }}" id="product-detail">
+                                </div>
+                                <div class="col-9">
+                                    <h5 id="{{item.unique_code}}-product__name" class="card-title">{{ item.product__name }}</h5>
+                                    <p class="card-subtitle mb-0 mb-lg-2 text-muted">Size {{ item.product__size__name }}</p>
+                                    <p id="{{item.unique_code}}-quantity" class="card-subtitle mb-0 mb-lg-2 text-muted">{{ item.quantity }} Items</p>
+                                    <input type="hidden" id="{{item.unique_code}}-short_unique_code" value="ID-{{ item.order_id }}">
+                                    <input type="hidden" id="{{item.unique_code}}-product__brand__name" value="{{ item.product__brand__name }}">
+                                    <input type="hidden" id="{{item.unique_code}}-product__category__name" value="{{ item.product__category__name }}">
+                                    <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.transaction_time }}">
+                                    <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
+                                    <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment_type }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city__address }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__service" value="{{ item.shipment__service }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__cost" value="{{ item.shipment__cost }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__etd" value="{{ item.shipment__etd }}">
+                                </div>
+                            </div>
+                      </div>
+                      <div class="card-footer">
+                        <div class="row align-items-center">
+                            <div class="col-8 col-lg-9 d-grid">
+                                <strong>Total <b>Rp. {{ item.gross_amount }}</b></strong>
+                            </div>
+                            <form method="POST" class="col-4 col-lg-3 d-grid">
+                                {% csrf_token %}
+                                <input type="hidden" name="order_id" value="{{ item.unique_code }}">
+                                {% if item.status == 'settlement' %}
+                                <button type="button" onclick="refund('{{ item.unique_code }}')" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#refundModal">Refund</button>
+                                {% else %}
+                                <button type="button" class="btn btn-success" disabled>Refund</button>
+                                {% endif %}
+                            </form>
+
+                        </div>
+                      </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+            <!-- Modal Detail -->
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="">Details Purchase</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body m-2">
+                      <table class="table table-borderless">
+                          <tbody>
+                            <tr>
+                                <td>Order ID</td>
+                                <td id="order_id"></td>
+                            </tr>
+                            <tr>
+                                <td>Product</td>
+                                <td id="product_name"></td>
+                            </tr>
+                            <tr>
+                                <td>Brand</td>
+                                <td id="brand_name"></td>
+                            </tr>
+                            <tr>
+                                <td>Type</td>
+                                <td id="category_name"></td>
+                            </tr>
+                            <tr>
+                                <td>Items</td>
+                                <td id="items"></td>
+                            </tr>
+                            <tr>
+                                <td>Price</td>
+                                <td id="price"></td>
+                            </tr>
+                            <tr>
+                                <td>Service</td>
+                                <td id="service"></td>
+                            </tr>
+                            <tr>
+                                <td>Shipment Cost</td>
+                                <td id="cost"></td>
+                            </tr>
+                            <tr>
+                                <td>Estimation</td>
+                                <td id="estimation"></td>
+                            </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td id="address"></td>
+                            </tr>
+                            <tr>
+                                <td>Transaction Time</td>
+                                <td id="transaction_time"></td>
+                            </tr>
+                            <tr>
+                                <td>Payment Type</td>
+                                <td id="payment_type"></td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td id="status_modal"></td>
+                            </tr>
+
+                          </tbody>
+                      </table>
+                  </div>
+                  <div class="modal-footer">
+                      <form action="" method="GET">
+                          <button type="submit" name="exportPDF" id="export_order_id" class="btn btn-warning">export PDF</button>
+                      </form>
+                      <form action="" method="GET">
+                          <button type="submit" name="product_name" id="buy_again_product" class="btn btn-success">buy again</button>
+                      </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Modal Detail -->
+
+            <!-- modal refund -->
+            <div class="modal fade" id="refundModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Refund Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form class="form" method="POST">
+                  {% csrf_token %}
+                  <div class="modal-body m-2">
+                      <input type="hidden" name="id_refund" id="id_refund">
+                      <input type="hidden" name="price_refund" id="price_refund">
+                      <textarea rows="3" name="reason" placeholder="Reason" class="form-control"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="submit" name="refund" class="btn btn-dark">refund</button>
+                  </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- end modal refund -->
+        </div>
+    </section>
+{% endblock %}
+{% block javascripts %}
+<script>
+function consumeData(id) {
+
+    short_unique_code = document.getElementById(id+"-short_unique_code").value;
+    product__brand__name = document.getElementById(id+"-product__brand__name").value;
+    status_text = document.getElementById(id+"-status").innerText;
+    product_name = document.getElementById(id+"-product__name").innerText;
+    quantity = document.getElementById(id+"-quantity").innerText;
+    product__category__name = document.getElementById(id+"-product__category__name").value;
+    transaction_time = document.getElementById(id+"-transaction_time").value;
+    product__price = document.getElementById(id+"-product__price").value;
+    payment_type = document.getElementById(id+"-payment_type").value;
+    address = document.getElementById(id+"-shipment__city__address").value;
+    service = document.getElementById(id+"-shipment__service").value;
+    cost = document.getElementById(id+"-shipment__cost").value;
+    estimation = document.getElementById(id+"-shipment__etd").value;
+
+
+    // alert(status_text)
+    document.getElementById("export_order_id").value = id;
+    document.getElementById("buy_again_product").value = product_name;
+    document.getElementById('order_id').innerHTML = short_unique_code;
+    document.getElementById('product_name').innerHTML = product_name;
+    document.getElementById('brand_name').innerHTML = product__brand__name;
+    document.getElementById('category_name').innerHTML = product__category__name;
+    document.getElementById('items').innerHTML = quantity;
+    document.getElementById('price').innerHTML = product__price;
+    document.getElementById('transaction_time').innerHTML = transaction_time;
+    document.getElementById('payment_type').innerHTML = payment_type;
+    document.getElementById('address').innerHTML = address;
+    document.getElementById('status_modal').innerHTML = status_text;
+    document.getElementById('service').innerHTML = "JNE " + service;
+    document.getElementById('cost').innerHTML = cost;
+    document.getElementById('estimation').innerHTML = estimation + " day";
+
+}
+
+function refund(id) {
+    product__price = document.getElementById(id+"-product__price").value;
+    document.getElementById("id_refund").value = id;
+    document.getElementById("price_refund").value = product__price;
+}
+
+</script>
+{% endblock javascripts %}

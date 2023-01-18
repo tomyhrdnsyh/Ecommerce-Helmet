@@ -31,12 +31,18 @@
 
     {% block content %}{% endblock content %}
 
-    {% include 'include/footer.html' %}
 
+    {% block footer %}
+    {% include 'include/footer.html' %}
+    {% endblock %}
+
+
+    {% block js %}
     <script src="{% static 'js/jquery-1.11.0.min.js' %}"></script>
     <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/templatemo.js' %}"></script>
+    {% endblock %}
 
     {% block javascripts %}{% endblock javascripts %}
 </body>

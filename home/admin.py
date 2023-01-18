@@ -17,6 +17,11 @@ class CustomUserAdmin(UserAdmin):
                 'fields': (
                     'full_name',
                     'phone_number',
+                    'address',
+                    'city',
+                    'province',
+                    'zip_code',
+                    'country',
                 )
             }
         )

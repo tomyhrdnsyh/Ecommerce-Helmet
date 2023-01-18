@@ -55,6 +55,10 @@
                         <i class="far fa-id-badge mr-2"></i> Profile
                         <span class="float-right text-muted text-sm">{{ request.user.username }}</span>
                     </a>
+                    <a class="dropdown-item" href="/order.html">
+                        <i class="fa fa-shopping-bag mr-2"></i> Orders
+                        <span class="float-right text-muted text-sm"></span>
+                    </a>
                     <a class="dropdown-item" href="{% url 'logout' %}">
                         <i class="fas fa-sign-out-alt mr-2"></i> Logout
                     </a>

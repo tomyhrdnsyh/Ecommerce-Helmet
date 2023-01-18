@@ -8,6 +8,11 @@ class CustomUser(AbstractUser):
     user_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=100, null=True)
     phone_number = models.CharField(max_length=20, null=True)
+    address = models.CharField(max_length=150, null=True)
+    city = models.CharField(max_length=50, null=True)
+    province = models.CharField(max_length=50, null=True)
+    zip_code = models.CharField(max_length=20, null=True)
+    country = models.CharField(max_length=50, null=True)
 
     class Meta:
         verbose_name = 'Users'

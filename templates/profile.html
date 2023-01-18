@@ -4,226 +4,147 @@
 
 {% block stylesheets %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/slick.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/slick-theme.css' %}">
 {% endblock stylesheets %}
 
 {% block content %}
+    <!-- Open Content -->
     <section class="bg-light">
         <div class="container pb-5">
-            {% if not profile_detail %}
-            <div class="row text-center pt-5">
-                <div class="col-12">
-                    <p class="h4">you have no shopping history</p>
-                    <a href="shop.html" class="btn btn-success mt-3">Shop Now</a>
-                </div>
-            </div>
-            {% else %}
-            {% for item in profile_detail %}
             <div class="row">
-                <div class="col-lg-12 {% if forloop.first %} mt-5 {% else %} mt-3 {% endif %}">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="row align-items-center">
-                                <div class="col-3">
-                                    <strong><i class="fa fa-shopping-cart" style="color: grey;"></i> Belanja</strong>
-                                </div>
-                                <div class="col-9 text-end">
-                                    <strong id="{{item.unique_code}}-status" class="btn {% if item.status == 'settlement' %} btn-outline-success {% elif item.status == 'pending' %} btn-outline-warning {% elif item.status == 'refunded' %} btn-outline-dark {% else %} btn-outline-danger {% endif %} btn-sm">{{ item.status }}</strong>
-                                    <button type="button" onclick="consumeData('{{ item.unique_code }}')" class="btn btn-light fa fa-ellipsis-v" style="color: grey;" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></button>
-                                </div>
-                            </div>
-                        </div>
-                      <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-3 col-lg-1">
-                                    <img class="img-fluid" src="{{ item.product__image }}" alt="{{ item.product__name }}" id="product-detail">
-                                </div>
-                                <div class="col-9">
-                                    <h5 id="{{item.unique_code}}-product__name" class="card-title">{{ item.product__name }}</h5>
-                                    <p class="card-subtitle mb-0 mb-lg-2 text-muted">Size {{ item.product__size__name }}</p>
-                                    <p id="{{item.unique_code}}-quantity" class="card-subtitle mb-0 mb-lg-2 text-muted">{{ item.quantity }} Items</p>
-                                    <input type="hidden" id="{{item.unique_code}}-short_unique_code" value="{{ item.short_unique_code }}">
-                                    <input type="hidden" id="{{item.unique_code}}-product__brand__name" value="{{ item.product__brand__name }}">
-                                    <input type="hidden" id="{{item.unique_code}}-product__category__name" value="{{ item.product__category__name }}">
-                                    <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.transaction_time }}">
-                                    <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
-                                    <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment_type }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city__address }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__service" value="{{ item.shipment__service }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__cost" value="{{ item.shipment__cost }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__etd" value="{{ item.shipment__etd }}">
-                                </div>
-                            </div>
-                      </div>
-                      <div class="card-footer">
-                        <div class="row align-items-center">
-                            <div class="col-8 col-lg-9 d-grid">
-                                <strong>Total <b>Rp. {{ item.gross_amount }}</b></strong>
-                            </div>
-                            <form method="POST" class="col-4 col-lg-3 d-grid">
+                <!-- col end -->
+                <div class="col-12 mt-5">
+                    <div class="card p-lg-5">
+                        <div class="card-body">
+                            <h3 class="mb-4 text-center">Profile Information</h3>
+                            <form action="" method="POST">
                                 {% csrf_token %}
-                                <input type="hidden" name="order_id" value="{{ item.unique_code }}">
-                                {% if item.status == 'settlement' %}
-                                <button type="button" onclick="refund('{{ item.unique_code }}')" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#refundModal">Refund</button>
-                                {% else %}
-                                <button type="button" class="btn btn-success" disabled>Refund</button>
-                                {% endif %}
+                                <div class="row">
+
+                                  <div class="input-container">
+                                    <i class="fa fa-user icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} placeholder="Full name" name="full_name">
+                                  </div>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-envelope icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} placeholder="Email" name="email">
+                                  </div>
+
+<!--                                  <div class="input-container">-->
+<!--                                    <i class="fa fa-key icon"></i>-->
+<!--                                    <input class="input-field" type="password" placeholder="Password" name="password">-->
+<!--                                  </div>-->
+
+                                    <hr>
+                                    <p>Shipping Information</p>
+                                    <hr>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-address-card icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.address %} value="{{ request.user.address }}" {% endif %} placeholder="Address..." name="address">
+                                  </div>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-building icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.city %} value="{{ request.user.city }}" {% endif %} placeholder="City..." name="city" >
+                                  </div>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-city icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.province %} value="{{ request.user.province }}" {% endif %} placeholder="Province..." name="province">
+                                  </div>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-map-pin icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.zip_code %} value="{{ request.user.zip_code }}" {% endif %} placeholder="Zip code..." name="zip_code">
+                                  </div>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-flag icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.country %} value="{{ request.user.country }}" {% endif %} placeholder="Cuontry..." name="country">
+                                  </div>
+
+                                </div>
+                                <div class="row pb-3 pt-3">
+                                    <div class="col d-grid">
+                                        <button type="submit" class="btn btn-success btn-lg" name="buy" value="buy">Save change</button>
+                                    </div>
+                                </div>
                             </form>
 
                         </div>
-                      </div>
                     </div>
-
                 </div>
+                <div id="liveAlertPlaceholder" class="mt-3"></div>
             </div>
-            {% endfor %}
-            {% endif %}
-            <!-- Modal Detail -->
-            <!-- Modal -->
-            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="">Details Purchase</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body m-2">
-                      <table class="table table-borderless">
-                          <tbody>
-                            <tr>
-                                <td>Order ID</td>
-                                <td id="order_id"></td>
-                            </tr>
-                            <tr>
-                                <td>Product</td>
-                                <td id="product_name"></td>
-                            </tr>
-                            <tr>
-                                <td>Brand</td>
-                                <td id="brand_name"></td>
-                            </tr>
-                            <tr>
-                                <td>Type</td>
-                                <td id="category_name"></td>
-                            </tr>
-                            <tr>
-                                <td>Items</td>
-                                <td id="items"></td>
-                            </tr>
-                            <tr>
-                                <td>Price</td>
-                                <td id="price"></td>
-                            </tr>
-                            <tr>
-                                <td>Service</td>
-                                <td id="service"></td>
-                            </tr>
-                            <tr>
-                                <td>Shipment Cost</td>
-                                <td id="cost"></td>
-                            </tr>
-                            <tr>
-                                <td>Estimation</td>
-                                <td id="estimation"></td>
-                            </tr>
-                            <tr>
-                                <td>Address</td>
-                                <td id="address"></td>
-                            </tr>
-                            <tr>
-                                <td>Transaction Time</td>
-                                <td id="transaction_time"></td>
-                            </tr>
-                            <tr>
-                                <td>Payment Type</td>
-                                <td id="payment_type"></td>
-                            </tr>
-                            <tr>
-                                <td>Status</td>
-                                <td id="status_modal"></td>
-                            </tr>
-
-                          </tbody>
-                      </table>
-                  </div>
-                  <div class="modal-footer">
-                      <form action="" method="GET">
-                          <input type="hidden" name="product_name" id="buy_again_product">
-                          <button type="submit" class="btn btn-success">buy again</button>
-                      </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- End Modal Detail -->
-
-            <!-- modal refund -->
-            <div class="modal fade" id="refundModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Refund Product</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <form class="form" method="POST">
-                  {% csrf_token %}
-                  <div class="modal-body m-2">
-                      <input type="hidden" name="id_refund" id="id_refund">
-                      <input type="hidden" name="price_refund" id="price_refund">
-                      <textarea rows="3" name="reason" placeholder="Reason" class="form-control"></textarea>
-                  </div>
-                  <div class="modal-footer">
-                      <button type="submit" name="refund" class="btn btn-dark">refund</button>
-                  </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-            <!-- end modal refund -->
         </div>
     </section>
-{% endblock %}
+    <!-- Close Content -->
+{% endblock content %}
+
 {% block javascripts %}
-<script>
-function consumeData(id) {
+    <!-- Start Slider Script -->
+    <script src="{% static 'js/slick.min.js' %}"></script>
+    <script>
+        $('#carousel-related-product').slick({
+            infinite: true,
+            arrows: false,
+            slidesToShow: 4,
+            slidesToScroll: 3,
+            dots: true,
+            responsive: [{
+                    breakpoint: 1024,
+                    settings: {
+                        slidesToShow: 3,
+                        slidesToScroll: 3
+                    }
+                },
+                {
+                    breakpoint: 600,
+                    settings: {
+                        slidesToShow: 2,
+                        slidesToScroll: 3
+                    }
+                },
+                {
+                    breakpoint: 480,
+                    settings: {
+                        slidesToShow: 2,
+                        slidesToScroll: 3
+                    }
+                }
+            ]
+        });
 
-    short_unique_code = document.getElementById(id+"-short_unique_code").value;
-    product__brand__name = document.getElementById(id+"-product__brand__name").value;
-    status_text = document.getElementById(id+"-status").innerText;
-    product_name = document.getElementById(id+"-product__name").innerText;
-    quantity = document.getElementById(id+"-quantity").innerText;
-    product__category__name = document.getElementById(id+"-product__category__name").value;
-    transaction_time = document.getElementById(id+"-transaction_time").value;
-    product__price = document.getElementById(id+"-product__price").value;
-    payment_type = document.getElementById(id+"-payment_type").value;
-    address = document.getElementById(id+"-shipment__city__address").value;
-    service = document.getElementById(id+"-shipment__service").value;
-    cost = document.getElementById(id+"-shipment__cost").value;
-    estimation = document.getElementById(id+"-shipment__etd").value;
+        const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
 
+        const alert = (message, type) => {
+          const wrapper = document.createElement('div')
+          wrapper.innerHTML = [
+            `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+            `   <div>${message}</div>`,
+            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            '</div>'
+          ].join('')
 
-    // alert(status_text)
-    document.getElementById("buy_again_product").value = product_name;
-    document.getElementById('order_id').innerHTML = short_unique_code;
-    document.getElementById('product_name').innerHTML = product_name;
-    document.getElementById('brand_name').innerHTML = product__brand__name;
-    document.getElementById('category_name').innerHTML = product__category__name;
-    document.getElementById('items').innerHTML = quantity;
-    document.getElementById('price').innerHTML = product__price;
-    document.getElementById('transaction_time').innerHTML = transaction_time;
-    document.getElementById('payment_type').innerHTML = payment_type;
-    document.getElementById('address').innerHTML = address;
-    document.getElementById('status_modal').innerHTML = status_text;
-    document.getElementById('service').innerHTML = "JNE " + service;
-    document.getElementById('cost').innerHTML = cost;
-    document.getElementById('estimation').innerHTML = estimation + " day";
+          alertPlaceholder.append(wrapper)
+        }
 
-}
+        const alertTrigger = document.getElementById('buyTrigger')
+        if (alertTrigger) {
+          alertTrigger.addEventListener('click', () => {
+            alert('Failed to buy. Please select size first!', 'danger')
+          })
+        }
 
-function refund(id) {
-    product__price = document.getElementById(id+"-product__price").value;
-    document.getElementById("id_refund").value = id;
-    document.getElementById("price_refund").value = product__price;
-}
-</script>
+        const cartTrigger = document.getElementById('cartTrigger')
+        if (cartTrigger) {
+          cartTrigger.addEventListener('click', () => {
+            alert('Add to cart failed. Please select size first!', 'danger')
+          })
+        }
+
+    </script>
 {% endblock javascripts %}

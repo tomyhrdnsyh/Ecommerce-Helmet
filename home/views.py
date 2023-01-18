@@ -271,9 +271,10 @@ def pages(request):
                 payload = f"origin=501&destination={city_id}&weight=1700&courier=jne"
 
                 response_cost = requests.post('http://api.rajaongkir.com/starter/cost', data=payload, headers=header)
+                print(response_cost.status_code)
                 data = response_cost.json()
                 detail_data = data['rajaongkir']['results'][0]['costs'][1]
-                print(detail_data)
+
                 service = detail_data.get('service')
                 description = detail_data.get('description')
                 cost = detail_data['cost'][0].get('value')
@@ -343,9 +344,30 @@ def pages(request):
             # return redirect('/midtrans-test.html')
 
     # ====================== end checkout ====================
-
     # ====================== Profile ====================
     if load_template == 'profile.html':
+        if not request.user.is_authenticated:
+            return login_sek(request)
+
+        if request.POST:
+            info_user = CustomUser.objects.get(username=request.user)
+            data = request.POST
+
+            info_user.full_name = data.get('full_name')
+            info_user.email = data.get('email')
+            info_user.address = data.get('address')
+            info_user.city = data.get('city')
+            info_user.province = data.get('province')
+            info_user.zip_code = data.get('zip_code')
+            info_user.country = data.get('country')
+
+            info_user.save()
+
+            return redirect('/profile.html')
+
+    # ====================== End Profile ====================
+    # ====================== Order ====================
+    if load_template == 'order.html':
         if not request.user.is_authenticated:
             return login_sek(request)
 
@@ -358,6 +380,7 @@ def pages(request):
         )
 
         unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code',
+                                                                                           'order_id',
                                                                                            'product__name', 'quantity',
                                                                                            'gross_amount',
                                                                                            'product__image',
@@ -403,6 +426,26 @@ def pages(request):
 
         context['profile_detail'] = unique_code
 
+        context['filter'] = set([item['status'] for item in unique_code])
+
+        if request.GET.get('filter'):
+            query = request.GET.get('filter')
+            context['profile_detail'] = [item for item in unique_code if item['status'] == query]
+
+        if 'exportPDF' in request.GET:
+            load_template = f'report/cetak_laporan_customer.html'
+            id_order = request.GET.get('exportPDF')
+            data = None
+            for item in unique_code:
+                if item.get('unique_code') == id_order:
+                    data = item
+
+            context['profile_detail'] = data
+
+            context['segment'] = load_template
+            html_template = loader.get_template(load_template)
+            return HttpResponse(html_template.render(context, request))
+
         # check if user click buy again this product
         if 'product_name' in request.GET:
             product_name = request.GET.get('product_name')
@@ -430,7 +473,7 @@ def pages(request):
                 refund.save()
                 order.status = 'refunded'
                 order.save()
-            return redirect('/profile.html')
+            return redirect('/order.html')
 
     context['segment'] = load_template
     html_template = loader.get_template(load_template)
@@ -561,8 +604,8 @@ def total_product_buy(request):
 def get_midtrans(request, cost, order_id):
     snap = midtransclient.Snap(
         is_production=False,
-        server_key='SB-Mid-server-01NTFWb6l738KBzH0OWZuhks',
-        client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
+        server_key='SB-Mid-server-PWpPema0nMJ82yYKbWIoYvA2',
+        client_key='SB-Mid-client-7OJDLb4f29FXBV4o'
     )
 
     cost = 0 if cost is None else cost

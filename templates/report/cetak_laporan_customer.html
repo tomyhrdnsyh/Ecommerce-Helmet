@@ -1,0 +1,102 @@
+{% extends "layout/base.html" %}
+{% load static %}
+{% block title %} Export Order {% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/slick.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/slick-theme.css' %}">
+{% endblock stylesheets %}
+
+{% block content %}
+<script>
+  window.addEventListener("load", myInitFunction)
+  function myInitFunction() {
+      window.print();
+        }
+        setTimeout(function (){
+            window.location.replace('/shop.html');
+        }, 1000)
+</script>
+<section class="bg-light">
+    <div class="container pb-5">
+        <div class="row">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <table class="table table-borderless">
+                          <tbody>
+                            <tr>
+                                <td>Order ID</td>
+                                <td id="order_id">ID-{{ profile_detail.order_id }}</td>
+                            </tr>
+                            <tr>
+                                <td>Product</td>
+                                <td id="product_name">{{ profile_detail.product__name }}</td>
+                            </tr>
+                            <tr>
+                                <td>Brand</td>
+                                <td id="brand_name">{{ profile_detail.product__brand__name }}</td>
+                            </tr>
+                            <tr>
+                                <td>Type</td>
+                                <td id="category_name">{{ profile_detail.product__category__name }}</td>
+                            </tr>
+                            <tr>
+                                <td>Items</td>
+                                <td id="items">{{ profile_detail.quantity }} Items</td>
+                            </tr>
+                            <tr>
+                                <td>Price</td>
+                                <td id="price">{{ profile_detail.product__price }}</td>
+                            </tr>
+                            <tr>
+                                <td>Service</td>
+                                <td id="service">JNE {{ profile_detail.shipment__service }}</td>
+                            </tr>
+                            <tr>
+                                <td>Shipment Cost</td>
+                                <td id="cost">{{ profile_detail.shipment__cost }}</td>
+                            </tr>
+                            <tr>
+                                <td>Estimation</td>
+                                <td id="estimation">{{ profile_detail.shipment__etd }} day</td>
+                            </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td id="address">{{ profile_detail.shipment__city__address }}</td>
+                            </tr>
+                            <tr>
+                                <td>Transaction Time</td>
+                                <td id="transaction_time">{{ profile_detail.transaction_time }}</td>
+                            </tr>
+                            <tr>
+                                <td>Payment Type</td>
+                                <td id="payment_type">{{ profile_detail.payment_type }}</td>
+                            </tr>
+                            <tr>
+                                <td>Status</td>
+                                <td id="status_modal">{{ profile_detail.status }}</td>
+                            </tr>
+
+                          </tbody>
+                      </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+{% block javascript %}
+<!--<script>-->
+<!--   window.onload = function() {-->
+<!--        window.print();-->
+<!--    }-->
+<!--    setTimeout(function (){-->
+<!--        window.location.replace('/order.html');-->
+<!--    }, 1000)-->
+<!--</script>-->
+{% endblock %}
