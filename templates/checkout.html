@@ -40,14 +40,17 @@
 								<div class="form-field">
 									<input class="form-control" type="text" name="country" placeholder="Country.." {% if request.user.country %} value="{{ request.user.country }}" {% endif %}>
 								</div>
+								{% for item in request.session.data %}
 								{% if request.session.cart_id %}
-								<input type="hidden" name="cart-id" value="{{ request.session.cart_id }}">
+								<input type="hidden" name="cart-id" value="{{ item.cart_id }}">
 								{% endif %}
-								<input type="hidden" name="product-id" value="{{ request.session.id }}">
-								<input type="hidden" name="product-name" value="{{ request.session.name }}">
-								<input type="hidden" name="product-size" value="{{ request.session.size }}">
-								<input type="hidden" name="product-qty" value="{{ request.session.quantity }}">
-								<input type="hidden" name="product-price" value="{{ request.session.price }}">
+								<input type="hidden" name="product-id" value="{{ item.id }}">
+								<input type="hidden" name="product-name" value="{{ item.name }}">
+								<input type="hidden" name="product-size" value="{{ item.size }}">
+								<input type="hidden" name="product-qty" value="{{ item.quantity }}">
+								<input type="hidden" name="product-price" value="{{ item.price }}">
+								{% endfor %}
+
 								<input type="hidden" name="product-total" value="{{ request.session.total }}">
 							</div>
 
@@ -66,12 +69,15 @@
 						<hr>
 						<h3>Order Summary</h3>
 						<hr>
+						{% for item in request.session.data %}
 						<div class="cart-row">
-							<div style="flex:2"><img class="row-image" src="{{ request.session.img }}"></div>
-							<div style="flex:2"><p>{{ request.session.name }}</p></div>
-							<div style="flex:2"><p>Rp. {{ request.session.price }}</p></div>
-							<div style="flex:1"><p>{{ request.session.size }}</p></div>
+							<div style="flex:2"><img class="row-image" src="{{ item.img }}"></div>
+
+							<div style="flex:2"><p>{{ item.name }}</p></div>
+							<div style="flex:2"><p>Rp. {{ item.price }}</p></div>
+							<div style="flex:1"><p>{{ item.size }}</p></div>
 						</div>
+						{% endfor %}
 						<h5>Items:   {{ request.session.quantity }}</h5>
 						<h5>Total:   Rp. {{ request.session.total }}</h5>
 					</div>

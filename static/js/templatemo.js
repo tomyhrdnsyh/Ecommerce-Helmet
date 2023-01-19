@@ -38,6 +38,7 @@ $(document).ready(function() {
     });
     $('#btn-plus').click(function(){
       var val = parseInt($("#var-value").html());
+
       var max_quantity = document.getElementById("max-quantity").value.match(/\d+/);
       if (val < max_quantity){
           val++;

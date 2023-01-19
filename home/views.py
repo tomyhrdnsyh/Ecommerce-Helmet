@@ -1,4 +1,5 @@
 import os.path
+import re
 
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
@@ -14,6 +15,7 @@ import uuid
 from itertools import chain
 import json
 import requests
+import numpy as np
 
 # Create your views here.
 SIZE_DICT = {'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
@@ -230,14 +232,39 @@ def pages(request):
                 return redirect('/cart.html')
 
             if 'buy' in request.POST:
-                request.session['id'] = request.POST.get('product_id')
-                request.session['cart_id'] = request.POST.get('cart-id')
-                request.session['name'] = request.POST.get('product-title')
-                request.session['img'] = request.POST.get('product-img')
-                request.session['size'] = request.POST.get('product-size')
-                request.session['price'] = request.POST.get('product-price')
-                request.session['quantity'] = request.POST.get('product-quanity')
-                request.session['total'] = request.POST.get('product-total')
+                data = request.POST
+                data_list, items, price = [], [], []
+
+                for item in data.getlist('checkbox'):
+                    index = data.getlist('product_id').index(item)
+
+                    items.append(int(data.getlist('product-quanity')[index]))
+                    price.append(int(data.getlist('product-price')[index].replace(',', '')))
+
+                    data_list.append(
+                        {
+                            'id': data.getlist('product_id')[index],
+                            'name': data.getlist('product-title')[index],
+                            'cart_id': data.getlist('cart-id')[index],
+                            'price': data.getlist('product-price')[index],
+                            'size': data.getlist('product-size')[index],
+                            'quantity': data.getlist('product-quanity')[index],
+                            'img': data.getlist('product-img')[index],
+                        }
+                    )
+                    # request.session['id'] = request.POST.getlist('product_id')[index]
+                    # request.session['cart_id'] = request.POST.getlist('cart-id')[index]
+                    # request.session['name'] = request.POST.getlist('product-title')[index]
+                    # request.session['img'] = request.POST.getlist('product-img')[index]
+                    # request.session['size'] = request.POST.getlist('product-size')[index]
+                    # request.session['price'] = request.POST.getlist('product-price')[index]
+                    # request.session['quantity'] = request.POST.getlist('product-quanity')[index]
+                    # request.session['total'] = request.POST.getlist('product-total')[index]
+
+                request.session['data'] = data_list
+                request.session['quantity'] = sum(items)
+                request.session['total'] = f"{np.multiply(price, items).sum():,}"
+
                 return redirect('/checkout.html')
     # ============ end cart =================
 
@@ -246,6 +273,7 @@ def pages(request):
         if request.POST:
             unique_code = uuid.uuid1()
             # ---------- raja ongkir ----------
+            # print(request.POST)
 
             path = os.path.dirname(__file__)
             with open(os.path.join(path, 'raja_ongkir_city/raja_ongkir_city.json')) as file:
@@ -266,13 +294,14 @@ def pages(request):
 
             if city_id:
 
-                header = {'key': '8dc52301d89f605294011c137f373561',
+                header = {'key': '4184d0c19d63cd3002f41c9f6fec9c9b',
                           'content-type': "application/x-www-form-urlencoded"}
                 payload = f"origin=501&destination={city_id}&weight=1700&courier=jne"
 
                 response_cost = requests.post('http://api.rajaongkir.com/starter/cost', data=payload, headers=header)
-                print(response_cost.status_code)
+                # print(response_cost.status_code)
                 data = response_cost.json()
+
                 detail_data = data['rajaongkir']['results'][0]['costs'][1]
 
                 service = detail_data.get('service')
@@ -287,55 +316,59 @@ def pages(request):
             # status_response = api_client.transactions.notification(mock_notification)
             # ---------- end midtrans ----------
 
-            product = Products.objects.get(product_id=request.POST.get('product-id'))
             # ------------ save to order model ------------
-            save_order = Order(
-                product=product,
-                user=request.user,
-                unique_code=unique_code,
-                quantity=request.POST.get('product-qty'),
-                gross_amount=int(request.POST.get('product-total').replace(',', '')),
-                updated_at=datetime.now(),
-                status='pending'
-            )
-            save_order.save()
-            # ------------ end save ------------
+            for i, item in enumerate(request.POST.getlist('product-id')):
+                product = Products.objects.get(product_id=item)
+                price = int(request.POST.getlist('product-price')[i].replace(',', ''))
+                qty = int(request.POST.getlist('product-qty')[i])
 
-            # ------------ update stock product ------------
-            product.stock = product.stock - int(request.POST.get('product-qty'))
-            product.save()
-            # ------------ end update stock product ------------
+                save_order = Order(
+                    product=product,
+                    user=request.user,
+                    unique_code=unique_code,
+                    quantity=request.POST.getlist('product-qty')[i],
+                    gross_amount=price*qty,
+                    updated_at=datetime.now(),
+                    status='pending'
+                )
+                save_order.save()
+                # ------------ end save ------------
 
-            # ------------ save to Province and Cities model ------------
-            province_obj, created = Province.objects.get_or_create(
-                province_name=request.POST.get('province')
-            )
+                # ------------ update stock product ------------
+                product.stock = product.stock - qty
+                product.save()
+                # ------------ end update stock product ------------
 
-            cities_obj, created = Cities.objects.get_or_create(
-                city_name=request.POST.get('city'),
-                postal_code=request.POST.get('zipcode'),
-                address=request.POST.get('address'),
-                province=province_obj
-            )
-            # ------------ end Province and Cities ------------
+                # ------------ save to Province and Cities model ------------
+                province_obj, created = Province.objects.get_or_create(
+                    province_name=request.POST.get('province')
+                )
 
-            # ------------ save to Shipment model ------------
-            Shipment.objects.create(
-                user=request.user,
-                city=cities_obj,
-                product_order=save_order,
-                service=service,
-                description=description,
-                cost=cost,
-                etd=etd
-            )
-            # ------------ end save ------------
+                cities_obj, created = Cities.objects.get_or_create(
+                    city_name=request.POST.get('city'),
+                    postal_code=request.POST.get('zipcode'),
+                    address=request.POST.get('address'),
+                    province=province_obj
+                )
+                # ------------ end Province and Cities ------------
 
-            # ------------ delete cart ------------
-            if request.POST.get('cart-id'):
-                delete_cart = Cart.objects.get(cart_id=request.POST.get('cart-id'))
-                delete_cart.delete()
-            # ------------ end delete cart ------------
+                # ------------ save to Shipment model ------------
+                Shipment.objects.create(
+                    user=request.user,
+                    city=cities_obj,
+                    product_order=save_order,
+                    service=service,
+                    description=description,
+                    cost=cost,
+                    etd=etd
+                )
+                # ------------ end save ------------
+
+                # ------------ delete cart ------------
+                if request.POST.get('cart-id'):
+                    delete_cart = Cart.objects.get(cart_id=request.POST.getlist('cart-id')[i])
+                    delete_cart.delete()
+                # ------------ end delete cart ------------
 
             return redirect(transaction['redirect_url'])
 
@@ -373,12 +406,6 @@ def pages(request):
 
         # update status every load this page
 
-        api_client = midtransclient.CoreApi(
-            is_production=False,
-            server_key='SB-Mid-server-01NTFWb6l738KBzH0OWZuhks',
-            client_key='SB-Mid-client-UsEaLuaU7PMBbq_u'
-        )
-
         unique_code = Order.objects.filter(user=request.user).order_by('-order_id').values('unique_code',
                                                                                            'order_id',
                                                                                            'product__name', 'quantity',
@@ -396,21 +423,22 @@ def pages(request):
                                                                                            )
         for item in unique_code:
             try:
-                status_response = api_client.transactions.status(item['unique_code'])
-            except Exception as e:
-                err = e
-
-            else:
-                # update status base on midtrans
-
                 if item['status'] == 'pending':
-                    update_order = Order.objects.get(unique_code=item['unique_code'])
+                    api_client = midtransclient.CoreApi(
+                        is_production=False,
+                        server_key='SB-Mid-server-PWpPema0nMJ82yYKbWIoYvA2',
+                        client_key='SB-Mid-client-7OJDLb4f29FXBV4o'
+                    )
+                    status_response = api_client.transactions.status(item['unique_code'])
+
+                    # update status base on midtrans
+                    update_order = Order.objects.get(order_id=item['order_id'])
                     update_order.status = status_response.get('transaction_status')
                     update_order.save()
 
                     # update or create transaction payment on model
                     obj, created = Payment.objects.update_or_create(
-                        order=Order.objects.get(unique_code=item['unique_code']),
+                        order=Order.objects.get(order_id=item['order_id']),
                         defaults={
                             'transaction_time': status_response.get('transaction_time'),
                             'gross_amount': int(status_response.get('gross_amount').replace('.00', '')),
@@ -418,11 +446,13 @@ def pages(request):
                         }
                     )
 
-                item['gross_amount'] = f"{item['gross_amount']:,}"
-                item['short_unique_code'] = item['unique_code'][:8] + "..."
-                item['transaction_time'] = status_response['transaction_time']
-                item['payment_type'] = status_response['payment_type']
-                item['product__price'] = f"{int(item['product__price']):,}"
+                    item['gross_amount'] = f"{item['gross_amount']:,}"
+                    item['short_unique_code'] = item['unique_code'][:8] + "..."
+                    item['transaction_time'] = status_response['transaction_time']
+                    item['payment_type'] = status_response['payment_type']
+                    item['product__price'] = f"{int(item['product__price']):,}"
+            except Exception as e:
+                err = e
 
         context['profile_detail'] = unique_code
 
@@ -457,7 +487,9 @@ def pages(request):
         # refund a transaction (not all payment channel allow refund via API)
         if 'refund' in request.POST:
             unique_code = request.POST.get('id_refund')
-            price = request.POST.get('price_refund').replace(',', '')
+
+            data_harga = request.POST.get('price_refund')
+            price = re.sub(r',|\.', '', data_harga)
             reason = request.POST.get('reason')
 
             try:
@@ -610,25 +642,28 @@ def get_midtrans(request, cost, order_id):
 
     cost = 0 if cost is None else cost
 
+    item_detail = [
+            {
+                "id": request.POST.getlist('product-id')[i],
+                "price": int(request.POST.getlist('product-price')[i].replace(',', '')),
+                "quantity": request.POST.getlist('product-qty')[i],
+                "name": request.POST.getlist('product-name')[i],
+                "brand": request.POST.getlist('product-price')[i],
+            } for i in range(len(request.POST.getlist('product-id')))
+        ]
+
+    biaya_raja_ongkir = {
+            "id": request.POST.get('product-id'),
+            "price": cost,
+            "quantity": 1,
+            "name": 'JNE REG Shipment Cost',
+        }
+    item_detail.append(biaya_raja_ongkir)
     param = {
         "transaction_details": {
             "order_id": f"{order_id}",
             "gross_amount": int(request.POST.get('product-total').replace(',', '')) + cost
-        }, "item_details": [
-            {
-                "id": request.POST.get('product-id'),
-                "price": int(request.POST.get('product-price').replace(',', '')),
-                "quantity": request.POST.get('product-qty'),
-                "name": request.POST.get('product-name'),
-                "brand": request.POST.get('product-price'),
-            },
-            {
-                "id": request.POST.get('product-id'),
-                "price": cost,
-                "quantity": request.POST.get('product-qty'),
-                "name": 'JNE REG Shipment Cost',
-            }
-        ],
+        }, "item_details": item_detail,
         "customer_details": {
             "first_name": request.POST.get('name'),
             "email": request.POST.get('email'),

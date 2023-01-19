@@ -14,12 +14,22 @@
                 </div>
             </div>
             {% else %}
+            <form action="" method="POST">
+            {% csrf_token %}
+            <div class="row text-end pt-5">
+                <div class="col-12">
+                    <button type="submit" name="buy" value="" style="width: 30%;" class="btn btn-success" id="submitBtn" disabled="disabled">Buy</button>
+                </div>
+            </div>
             {% for item in cart_info %}
             <div class="row">
-                <div class="col-lg-12 {% if forloop.first %} mt-5 {% else %} mt-3 {% endif %}">
+                <div class="col-lg-12 {% if forloop.first %} mt-2 {% else %} mt-3 {% endif %}">
                     <div class="card">
                       <div class="card-body">
                             <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <input type="checkbox" onclick="checkBox('{{ item.product }}')" id="the-terms-{{ item.product }}" name="checkbox" value="{{ item.product }}">
+                                </div>
                                 <div class="col-3 col-lg-1">
                                     <img class="img-fluid" src="{{ item.product__image }}" alt="Card image cap" id="product-detail">
                                 </div>
@@ -27,30 +37,35 @@
                                     <h5 class="card-title">{{ item.product__name }}</h5>
                                     <h6 class="card-subtitle mb-2 mb-lg-3 text-muted">Size : {{ item.product__size__name }}</h6>
                                     <h6 class="card-subtitle mb-2 mb-lg-3 text-muted">Price : Rp. {{ item.product__price }}</h6>
-                                    <h6 class="card-subtitle mb-2 mb-lg-3 text-muted">Quantity : {{ item.quantity }}</h6>
+<!--                                    <h6 class="card-subtitle mb-2 mb-lg-3 text-muted">Quantity : {{ item.quantity }}</h6>-->
                                     <h6 class="card-text"><strong>Total Rp. {{ item.price_total }}</strong></h6>
                                 </div>
                             </div>
                       </div>
                       <div class="card-footer">
                         <div class="row justify-content-center">
-                            <form method="POST" class="col-6 d-grid">
-                                {% csrf_token %}
+                            <div class="col-6 d-grid">
+
                                 <button type="submit" name="delete_cart" value="{{ item.cart_id }}" class="btn btn-light fa fa-trash" style="color: grey;"></button>
-                            </form>
-                            <form method="POST" class="col-6 d-grid">
-                                {% csrf_token %}
-                                <input type="hidden" name="product_id" value="{{ item.product }}">
+                            </div>
+                            <div class="col-6 d-grid">
+<!--                                {% csrf_token %}-->
+                                <input type="hidden" name="product_id" id="product_id" value="{{ item.product }}">
                                 <input type="hidden" name="cart-id" value="{{ item.cart_id }}">
                                 <input type="hidden" name="product-title" value="{{ item.product__name }}">
                                 <input type="hidden" name="product-img" value="{{ item.product__image }}">
                                 <input type="hidden" name="product-size" value="{{ item.product__size__name }}">
                                 <input type="hidden" name="product-price" value="{{ item.product__price }}">
-                                <input type="hidden" name="product-quanity" value="{{ item.quantity }}">
+                                <input type="hidden" id="product-quanity" name="product-quanity" value="{{ item.quantity }}">
                                 <input type="hidden" name="product-total" value="{{ item.price_total }}">
-
-                                <button type="submit" name="buy" class="btn btn-success">Buy</button>
-                            </form>
+                                <input type="hidden" name="max-quanity" id="max-quantity" value="5">
+                                <ul class="list-inline text-end">
+                                    <li class="list-inline-item h4">Quantity :</li>
+                                    <li class="list-inline-item"><span class="btn btn-success" onclick="btnMinus('{{ item.product }}')">-</span></li>
+                                    <li class="list-inline-item"><span class="badge bg-secondary" id="var-value-{{ item.product }}">1</span></li>
+                                    <li class="list-inline-item"><span class="btn btn-success" onclick="btnPlus('{{ item.product }}')">+</span></li>
+                                </ul>
+                            </div>
 
                         </div>
                       </div>
@@ -58,6 +73,7 @@
                 </div>
             </div>
             {% endfor %}
+            </form>
             {% endif %}
         </div>
     </section>
@@ -66,4 +82,34 @@
 {% block javascripts %}
     <!-- Start Slider Script -->
     <script src="{% static 'js/slick.min.js' %}"></script>
+    <script>
+        function checkBox(id) {
+        var the_terms = $("#the-terms-"+id);
+
+            if (the_terms.is(":checked")) {
+                $("#submitBtn").removeAttr("disabled");
+            } else {
+                $("#submitBtn").attr("disabled", "disabled");
+            }
+    };
+
+    function btnMinus(id) {
+      var val = $("#var-value-"+id).html();
+      val = (val=='1')?val:val-1;
+      $("#var-value-"+id).html(val);
+      $("#product-quanity").val(val);
+      return false;
+    }
+
+    function btnPlus(id) {
+      var val = parseInt($("#var-value-"+id).html());
+      var max_quantity = document.getElementById("max-quantity").value.match(/\d+/);
+      if (val < max_quantity){
+          val++;
+      };
+      $("#var-value-"+id).html(val);
+      $("#product-quanity").val(val);
+      return false;
+    }
+    </script>
 {% endblock %}
