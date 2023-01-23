@@ -60,9 +60,9 @@
                                     <input type="hidden" id="{{item.unique_code}}-short_unique_code" value="ID-{{ item.order_id }}">
                                     <input type="hidden" id="{{item.unique_code}}-product__brand__name" value="{{ item.product__brand__name }}">
                                     <input type="hidden" id="{{item.unique_code}}-product__category__name" value="{{ item.product__category__name }}">
-                                    <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.transaction_time }}">
+                                    <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.payment__transaction_time }}">
                                     <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
-                                    <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment_type }}">
+                                    <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment__payment_type }}">
                                     <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city__address }}">
                                     <input type="hidden" id="{{item.unique_code}}-shipment__service" value="{{ item.shipment__service }}">
                                     <input type="hidden" id="{{item.unique_code}}-shipment__cost" value="{{ item.shipment__cost }}">

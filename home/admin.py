@@ -49,6 +49,9 @@ class ShipmentAdmin(admin.ModelAdmin):
                     "user", "city", "service",
                     "description", "cost", "etd")
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Products)
 class ProductAdmin(admin.ModelAdmin):
@@ -81,17 +84,26 @@ class CartAdmin(admin.ModelAdmin):
     list_display = ("cart_id", "product", "user",
                     "quantity", "date", "price_total")
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("order_id", "product", "quantity", "user", "unique_code",
                     "created_at", "updated_at", "gross_amount", "status")
 
+    def has_add_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ("payment_id", "order", "transaction_time",
                     "gross_amount", "payment_type")
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(ProductPurchases)

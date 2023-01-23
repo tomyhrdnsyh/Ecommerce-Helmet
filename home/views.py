@@ -396,6 +396,8 @@ def pages(request):
 
             info_user.save()
 
+            msg = 'Edit Profile Success!'
+            messages.success(request, msg)
             return redirect('/profile.html')
 
     # ====================== End Profile ====================
@@ -420,6 +422,8 @@ def pages(request):
                                                                                            'shipment__service',
                                                                                            'shipment__cost',
                                                                                            'shipment__etd',
+                                                                                           'payment__transaction_time',
+                                                                                           'payment__payment_type',
                                                                                            )
         for item in unique_code:
             try:
@@ -716,7 +720,7 @@ def get_midtrans(request, cost, order_id):
             "recipient_name": "SUDARSONO"
         },
         "callbacks": {
-            "finish": "http://127.0.0.1:8000/shop.html"
+            "finish": "https://pritohelmet.pythonanywhere.com/shop.html"
         },
         "expiry": {
             "start_time": str(datetime.now().replace(microsecond=0)) + "+0700",
