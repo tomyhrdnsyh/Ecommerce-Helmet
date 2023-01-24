@@ -182,16 +182,22 @@ def pages(request):
                 return login_sek(request)
 
             if request.POST.get('buy'):
+                data = [{
+                    'id': request.POST.get('product_id'),
+                    'name': request.POST.get('product-title'),
+                    'price': request.POST.get('product-price'),
+                    'size': request.POST.get('product-size'),
+                    'quantity': request.POST.get('product-quanity'),
+                    'img': request.POST.get('product-img')
+                }]
 
-                request.session['id'] = request.POST.get('product_id')
-                request.session['name'] = request.POST.get('product-title')
-                request.session['img'] = request.POST.get('product-img')
-                request.session['size'] = request.POST.get('product-size')
-                request.session['price'] = request.POST.get('product-price')
-                request.session['quantity'] = request.POST.get('product-quanity')
                 total = int(request.POST.get('product-quanity')) * int(
                     request.POST.get('product-price').replace(',', ''))
+
                 request.session['total'] = f'{total:,}'
+                request.session['quantity'] = request.POST.get('product-quanity')
+                request.session['data'] = data
+
                 return redirect('/checkout.html')
             else:
                 product_id = request.POST.get('product_id')
@@ -252,14 +258,6 @@ def pages(request):
                             'img': data.getlist('product-img')[index],
                         }
                     )
-                    # request.session['id'] = request.POST.getlist('product_id')[index]
-                    # request.session['cart_id'] = request.POST.getlist('cart-id')[index]
-                    # request.session['name'] = request.POST.getlist('product-title')[index]
-                    # request.session['img'] = request.POST.getlist('product-img')[index]
-                    # request.session['size'] = request.POST.getlist('product-size')[index]
-                    # request.session['price'] = request.POST.getlist('product-price')[index]
-                    # request.session['quantity'] = request.POST.getlist('product-quanity')[index]
-                    # request.session['total'] = request.POST.getlist('product-total')[index]
 
                 request.session['data'] = data_list
                 request.session['quantity'] = sum(items)
@@ -271,6 +269,8 @@ def pages(request):
     # ====================== checkout ====================
     if load_template == 'checkout.html':
         if request.POST:
+            print(request.POST)
+
             unique_code = uuid.uuid1()
             # ---------- raja ongkir ----------
             # print(request.POST)
@@ -365,7 +365,7 @@ def pages(request):
                 # ------------ end save ------------
 
                 # ------------ delete cart ------------
-                if request.POST.get('cart-id'):
+                if 'cart-id' in request.POST:
                     delete_cart = Cart.objects.get(cart_id=request.POST.getlist('cart-id')[i])
                     delete_cart.delete()
                 # ------------ end delete cart ------------

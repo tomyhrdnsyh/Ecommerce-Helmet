@@ -41,7 +41,7 @@
 									<input class="form-control" type="text" name="country" placeholder="Country.." {% if request.user.country %} value="{{ request.user.country }}" {% endif %}>
 								</div>
 								{% for item in request.session.data %}
-								{% if request.session.cart_id %}
+								{% if item.cart_id %}
 								<input type="hidden" name="cart-id" value="{{ item.cart_id }}">
 								{% endif %}
 								<input type="hidden" name="product-id" value="{{ item.id }}">

@@ -43,7 +43,7 @@
                                     <strong><i class="fa fa-shopping-cart" style="color: grey;"></i> Belanja</strong>
                                 </div>
                                 <div class="col-9 text-end">
-                                    <strong id="{{item.unique_code}}-status" class="btn {% if item.status == 'settlement' %} btn-outline-success {% elif item.status == 'pending' %} btn-outline-warning {% elif item.status == 'refunded' %} btn-outline-dark {% else %} btn-outline-danger {% endif %} btn-sm">{{ item.status }}</strong>
+                                    <strong id="{{item.unique_code}}-status" class="btn {% if item.status == 'settlement' or item.status == 'capture' %} btn-outline-success {% elif item.status == 'pending' %} btn-outline-warning {% elif item.status == 'refunded' %} btn-outline-dark {% else %} btn-outline-danger {% endif %} btn-sm">{{ item.status }}</strong>
                                     <button type="button" onclick="consumeData('{{ item.unique_code }}')" class="btn btn-light fa fa-ellipsis-v" style="color: grey;" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></button>
                                 </div>
                             </div>
@@ -78,7 +78,7 @@
                             <form method="POST" class="col-4 col-lg-3 d-grid">
                                 {% csrf_token %}
                                 <input type="hidden" name="order_id" value="{{ item.unique_code }}">
-                                {% if item.status == 'settlement' %}
+                                {% if item.status == 'settlement' or item.status == 'capture' %}
                                 <button type="button" onclick="refund('{{ item.unique_code }}')" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#refundModal">Refund</button>
                                 {% else %}
                                 <button type="button" class="btn btn-success" disabled>Refund</button>
