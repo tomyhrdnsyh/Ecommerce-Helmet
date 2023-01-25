@@ -19,7 +19,7 @@ import numpy as np
 
 # Create your views here.
 SIZE_DICT = {'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
-
+PATH = os.path.dirname(__file__)
 
 def index(request):
     context = {}
@@ -275,8 +275,7 @@ def pages(request):
             # ---------- raja ongkir ----------
             # print(request.POST)
 
-            path = os.path.dirname(__file__)
-            with open(os.path.join(path, 'raja_ongkir_city/raja_ongkir_city.json')) as file:
+            with open(os.path.join(PATH, 'raja_ongkir_city/raja_ongkir_city.json')) as file:
                 city_data = json.load(file)
 
             city = request.POST.get('city').lower()
@@ -293,16 +292,20 @@ def pages(request):
             etd = None
 
             if city_id:
+                # it from api
+                # header = {'key': '4184d0c19d63cd3002f41c9f6fec9c9b',
+                #           'content-type': "application/x-www-form-urlencoded"}
+                # payload = f"origin=501&destination={city_id}&weight=1700&courier=jne"
+                #
+                # response_cost = requests.post('http://api.rajaongkir.com/starter/cost', data=payload, headers=header)
+                # data = response_cost.json()
 
-                header = {'key': '4184d0c19d63cd3002f41c9f6fec9c9b',
-                          'content-type': "application/x-www-form-urlencoded"}
-                payload = f"origin=501&destination={city_id}&weight=1700&courier=jne"
+                # detail_data = data['rajaongkir']['results'][0]['costs'][1]
 
-                response_cost = requests.post('http://api.rajaongkir.com/starter/cost', data=payload, headers=header)
+                data = check_ongkir(city_id)[0]
                 # print(response_cost.status_code)
-                data = response_cost.json()
 
-                detail_data = data['rajaongkir']['results'][0]['costs'][1]
+                detail_data = data['costs'][1] if len(data['costs']) > 0 else data.get('costs')[0]
 
                 service = detail_data.get('service')
                 description = detail_data.get('description')
@@ -327,7 +330,7 @@ def pages(request):
                     user=request.user,
                     unique_code=unique_code,
                     quantity=request.POST.getlist('product-qty')[i],
-                    gross_amount=price*qty,
+                    gross_amount=price * qty,
                     updated_at=datetime.now(),
                     status='pending'
                 )
@@ -647,21 +650,21 @@ def get_midtrans(request, cost, order_id):
     cost = 0 if cost is None else cost
 
     item_detail = [
-            {
-                "id": request.POST.getlist('product-id')[i],
-                "price": int(request.POST.getlist('product-price')[i].replace(',', '')),
-                "quantity": request.POST.getlist('product-qty')[i],
-                "name": request.POST.getlist('product-name')[i],
-                "brand": request.POST.getlist('product-price')[i],
-            } for i in range(len(request.POST.getlist('product-id')))
-        ]
+        {
+            "id": request.POST.getlist('product-id')[i],
+            "price": int(request.POST.getlist('product-price')[i].replace(',', '')),
+            "quantity": request.POST.getlist('product-qty')[i],
+            "name": request.POST.getlist('product-name')[i],
+            "brand": request.POST.getlist('product-price')[i],
+        } for i in range(len(request.POST.getlist('product-id')))
+    ]
 
     biaya_raja_ongkir = {
-            "id": request.POST.get('product-id'),
-            "price": cost,
-            "quantity": 1,
-            "name": 'JNE REG Shipment Cost',
-        }
+        "id": request.POST.get('product-id'),
+        "price": cost,
+        "quantity": 1,
+        "name": 'JNE REG Shipment Cost',
+    }
     item_detail.append(biaya_raja_ongkir)
     param = {
         "transaction_details": {
@@ -736,5 +739,12 @@ def get_midtrans(request, cost, order_id):
 def login_sek(request):
     messages.info(request, 'You must login first for use this feature!')
     return redirect('login')
+
+
+def check_ongkir(city_id):
+    with open(os.path.join(PATH, 'raja_ongkir_city/shipment_cost_jogja_to_all.json')) as file:
+        data = json.load(file)
+
+        return data[city_id]
 
 # -------------------------- end function preprocessing data --------------------------
