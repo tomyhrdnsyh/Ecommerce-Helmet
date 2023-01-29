@@ -14,10 +14,10 @@
 							{% csrf_token %}
 							<div id="user-info">
 								<div class="form-field">
-									<input required class="form-control" type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} name="name" placeholder="Name..">
+									<input required class="form-control" required type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} name="name" placeholder="Name..">
 								</div>
 								<div class="form-field">
-									<input required class="form-control" type="email" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} name="email" placeholder="Email..">
+									<input required class="form-control" required type="email" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} name="email" placeholder="Email..">
 								</div>
 							</div>
 
@@ -26,19 +26,19 @@
 								<p>Shipping Information:</p>
 								<hr>
 								<div class="form-field">
-									<input class="form-control" type="text" name="address" {% if request.user.address %} value="{{ request.user.address }}" {% endif %} placeholder="Address..">
+									<input class="form-control" required type="text" name="address" {% if request.user.address %} value="{{ request.user.address }}" {% endif %} placeholder="Address..">
 								</div>
 								<div class="form-field">
-									<input class="form-control" type="text" name="city" {% if request.user.city %} value="{{ request.user.city }}" {% endif %} placeholder="City..">
+									<input class="form-control" required type="text" name="city" {% if request.user.city %} value="{{ request.user.city }}" {% endif %} placeholder="City..">
 								</div>
 								<div class="form-field">
-									<input class="form-control" type="text" name="province" placeholder="Province.." {% if request.user.province %} value="{{ request.user.province }}" {% endif %}>
+									<input class="form-control" required type="text" name="province" placeholder="Province.." {% if request.user.province %} value="{{ request.user.province }}" {% endif %}>
 								</div>
 								<div class="form-field">
-									<input class="form-control" type="text" name="zipcode" placeholder="Zip code.." {% if request.user.zip_code %} value="{{ request.user.zip_code }}" {% endif %}>
+									<input class="form-control" required type="text" name="zipcode" placeholder="Zip code.." {% if request.user.zip_code %} value="{{ request.user.zip_code }}" {% endif %}>
 								</div>
 								<div class="form-field">
-									<input class="form-control" type="text" name="country" placeholder="Country.." {% if request.user.country %} value="{{ request.user.country }}" {% endif %}>
+									<input class="form-control" required type="text" name="country" placeholder="Country.." {% if request.user.country %} value="{{ request.user.country }}" {% endif %}>
 								</div>
 								{% for item in request.session.data %}
 								{% if item.cart_id %}
