@@ -270,7 +270,6 @@ def pages(request):
     # ====================== checkout ====================
     if load_template == 'checkout.html':
         if request.POST:
-            print(request.POST)
 
             unique_code = uuid.uuid1()
             # ---------- raja ongkir ----------
@@ -304,6 +303,7 @@ def pages(request):
                 # detail_data = data['rajaongkir']['results'][0]['costs'][1]
 
                 data = check_ongkir(city_id)[0]
+
                 # print(response_cost.status_code)
 
                 detail_data = data['costs'][1] if len(data['costs']) > 0 else data.get('costs')[0]
@@ -391,6 +391,7 @@ def pages(request):
             data = request.POST
 
             info_user.full_name = data.get('full_name')
+            info_user.phone_number = data.get('phone_number')
             info_user.email = data.get('email')
             info_user.address = data.get('address')
             info_user.city = data.get('city')
@@ -513,6 +514,11 @@ def pages(request):
                 refund.save()
                 order.status = 'refunded'
                 order.save()
+                link = request.build_absolute_uri('/contact.html')
+                msg = "Produk bisa dikembalikan langsung pada toko Pritohelmet. " \
+                      f"<a href='{link}'>Detail alamat</a>"
+                messages.success(request, msg)
+
             return redirect('/order.html')
 
     context['segment'] = load_template
@@ -725,7 +731,7 @@ def get_midtrans(request, cost, order_id):
             "recipient_name": "SUDARSONO"
         },
         "callbacks": {
-            "finish": "https://pritohelmet.pythonanywhere.com/shop.html"
+            "finish": request.build_absolute_uri('/shop.html')
         },
         "expiry": {
             "start_time": str(datetime.now().replace(microsecond=0)) + "+0700",

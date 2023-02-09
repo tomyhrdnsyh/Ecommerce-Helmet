@@ -34,6 +34,11 @@
                                   </div>
 
                                   <div class="input-container">
+                                    <i class="fa fa-phone icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.phone_number %} value="{{ request.user.phone_number}}" {% endif %} placeholder="Phone number" name="phone_number">
+                                  </div>
+
+                                  <div class="input-container">
                                     <i class="fa fa-envelope icon"></i>
                                     <input class="input-field" type="text" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} placeholder="Email" name="email">
                                   </div>

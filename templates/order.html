@@ -10,6 +10,7 @@
 {% block content %}
     <section class="bg-light">
         <div class="container pb-5">
+
             {% if not profile_detail %}
             <div class="row text-center pt-5">
                 <div class="col-12">
@@ -20,6 +21,14 @@
             {% else %}
 
             <div class="row">
+                {% autoescape off %}
+                {% for message in messages %}
+                <div class="alert {% if message.tags %} {{ message.tags }} {% endif %} alert-dismissible fade show" role="alert" data-aos="fade-up" data-aos-delay="300">
+                  <strong>Holy {{ request.user.username }}!</strong> {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endautoescape %}
                 <div class="col-12 mt-4">
                         <ul class="list-inline shop-top-menu p-3">
                         <li class="list-inline-item">
@@ -110,6 +119,10 @@
                                 <td id="order_id"></td>
                             </tr>
                             <tr>
+                                <td>Name</td>
+                                <td id="full_name">{{ request.user.full_name }}</td>
+                            </tr>
+                            <tr>
                                 <td>Product</td>
                                 <td id="product_name"></td>
                             </tr>
@@ -185,9 +198,19 @@
                   <form class="form" method="POST">
                   {% csrf_token %}
                   <div class="modal-body m-2">
+                      <p class="h6 mb-4">Syarat & Ketentuan refund</p>
+
+                      <ul>
+                          <li>Barang cacat pabrik</li>
+                          <li>Penukaran Size</li>
+                          <li>Berlaku jika produk masih segel dan tag masih terpasang dan kondisi product baru seperti saat diterima packing refund seperti saat pengiriman</li>
+                          <li>Bersedia menanggung ongkos kirim selama proses refund</li>
+                          <li>Pengembalian dana akan dihubungi oleh admin.</li>
+                      </ul><br>
+
                       <input type="hidden" name="id_refund" id="id_refund">
                       <input type="hidden" name="price_refund" id="price_refund">
-                      <textarea rows="3" name="reason" placeholder="Reason" class="form-control"></textarea>
+                      <textarea rows="3" name="reason" placeholder="Reason" required class="form-control"></textarea>
                   </div>
                   <div class="modal-footer">
                       <button type="submit" name="refund" class="btn btn-dark">refund</button>
@@ -219,10 +242,10 @@ function consumeData(id) {
     estimation = document.getElementById(id+"-shipment__etd").value;
 
 
-    // alert(status_text)
     document.getElementById("export_order_id").value = id;
     document.getElementById("buy_again_product").value = product_name;
     document.getElementById('order_id').innerHTML = short_unique_code;
+    // document.getElementById('full_name').innerHTML ="{{ request.user.usename }}";
     document.getElementById('product_name').innerHTML = product_name;
     document.getElementById('brand_name').innerHTML = product__brand__name;
     document.getElementById('category_name').innerHTML = product__category__name;

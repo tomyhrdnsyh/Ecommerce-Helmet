@@ -13,9 +13,15 @@
         <div class="col-md-6 m-auto text-center">
             <h1 class="h1">Contact Us</h1>
             <p>
-                Proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                Lorem ipsum dolor sit amet.
+                Phone number : 088226656400.
             </p>
+            <p>
+                Email: Cspritohelmet@gmail.com.
+            </p>
+           <p>Jl. Wates No.KM 4,5, Gamping Tengah, Ambarketawang, Kec. Gamping, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55294</p>
+            <h2 class="h2">OPEN Senin-Minggu⏰09:00-21:00.
+
+                 </h2>
         </div>
     </div>
 
@@ -23,7 +29,7 @@
     <div id="mapid" style="width: 100%; height: 500px;"></div>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     <script>
-        var mymap = L.map('mapid').setView([-7.7475075, 110.3532275, 10], 10);
+        var mymap = L.map('mapid').setView([-7.800262, 110.324866, 10], 10);
 
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
@@ -35,7 +41,7 @@
             zoomOffset: -1
         }).addTo(mymap);
 
-        L.marker([-7.7475075,110.3532275, 10]).addTo(mymap)
+        L.marker([-7.800262, 110.324866, 10]).addTo(mymap)
             .bindPopup("<b>PRITOHELMET</b> Location.").openPopup();
 
         // mymap.touchZoom.disable();

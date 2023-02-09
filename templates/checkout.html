@@ -14,10 +14,10 @@
 							{% csrf_token %}
 							<div id="user-info">
 								<div class="form-field">
-									<input required class="form-control" required type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} name="name" placeholder="Name..">
+									<input class="form-control" disabled required type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} name="name" placeholder="Name..">
 								</div>
 								<div class="form-field">
-									<input required class="form-control" required type="email" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} name="email" placeholder="Email..">
+									<input class="form-control" disabled required type="email" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} name="email" placeholder="Email..">
 								</div>
 							</div>
 
@@ -28,14 +28,26 @@
 								<div class="form-field">
 									<input class="form-control" required type="text" name="address" {% if request.user.address %} value="{{ request.user.address }}" {% endif %} placeholder="Address..">
 								</div>
+
 								<div class="form-field">
-									<input class="form-control" required type="text" name="city" {% if request.user.city %} value="{{ request.user.city }}" {% endif %} placeholder="City..">
+									<select id="Province" name="province" size="1" class="form-control" required>
+										<option  value="" selected="selected">-- Select Province --</option>
+								  	</select>
+								</div>
+<!--								<div class="form-field">-->
+<!--									<input class="form-control" id="Province" required type="text" name="province" placeholder="Province.." {% if request.user.province %} value="{{ request.user.province }}" {% endif %}>-->
+<!--								</div>-->
+								<div class="form-field">
+<!--									<input class="form-control" id="City" required type="text" name="city" {% if request.user.city %} value="{{ request.user.city }}" {% endif %} placeholder="City..">-->
+									<select id="City" size="1" class="form-control" name="city" required>
+										<option  value="" selected="selected">-- Select City --</option>
+								  	</select>
 								</div>
 								<div class="form-field">
-									<input class="form-control" required type="text" name="province" placeholder="Province.." {% if request.user.province %} value="{{ request.user.province }}" {% endif %}>
-								</div>
-								<div class="form-field">
-									<input class="form-control" required type="text" name="zipcode" placeholder="Zip code.." {% if request.user.zip_code %} value="{{ request.user.zip_code }}" {% endif %}>
+									<select id="Zipcode" size="1" name="zipcode" class="form-control">
+										<option  value="" selected="selected">-- Select Zipcode --</option>
+								  	</select>
+<!--									<input class="form-control" id="Zipcode" required type="text" name="zipcode" placeholder="Zip code.." {% if request.user.zip_code %} value="{{ request.user.zip_code }}" {% endif %}>-->
 								</div>
 								<div class="form-field">
 									<input class="form-control" required type="text" name="country" placeholder="Country.." {% if request.user.country %} value="{{ request.user.country }}" {% endif %}>
@@ -85,4 +97,8 @@
 			</div>
 		</div>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+<script src="{% static 'js/province.js' %}"></script>
 {% endblock %}
