@@ -71,6 +71,22 @@ JAZZMIN_SETTINGS = {
             # {"model": "auth.User"},
         ],
     # "language_chooser": True,
+    "icons": {
+        "home.Payment": "fas fa-donate",
+        "home.Order": "fas fa-donate",
+        "home.Cities": "fas fa-donate",
+        "home.Province": "fas fa-donate",
+        "home.Cart": "fas fa-donate",
+        "home.Shipment": "fas fa-donate",
+        "home.RefundProduct": "fas fa-donate",
+        "home.ProductPurchases": "fas fa-donate",
+        "home.CustomUser": "fas fa-users-cog",
+        "home.Categories": "fas fa-database",
+        "home.SizeCategories": "fas fa-database",
+        "home.Sizes": "fas fa-database",
+        "home.Brands": "fas fa-database",
+        "home.Products": "fas fa-database",
+    }
 
 }
 
