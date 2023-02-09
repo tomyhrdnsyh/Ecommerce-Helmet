@@ -21,6 +21,7 @@ import numpy as np
 SIZE_DICT = {'S': 'Small', 'M': 'Medium', 'L': 'Large', 'XL': 'Extra Large', 'XXL': 'Extra Extra Large'}
 PATH = os.path.dirname(__file__)
 
+
 def index(request):
     context = {}
 
@@ -640,6 +641,7 @@ def total_product_buy(request):
     return 0
 
 
+# payment gateway function
 def get_midtrans(request, cost, order_id):
     snap = midtransclient.Snap(
         is_production=False,
