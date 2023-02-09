@@ -27,6 +27,9 @@ class Province(models.Model):
     def __str__(self):
         return self.province_name
 
+    class Meta:
+        verbose_name_plural = 'Transaction Provinces'
+
 
 class Cities(models.Model):
     city_id = models.AutoField(primary_key=True)
@@ -39,7 +42,7 @@ class Cities(models.Model):
         return self.city_name
 
     class Meta:
-        verbose_name_plural = 'Cities'
+        verbose_name_plural = 'Transaction Cities'
 
 
 class Categories(models.Model):
@@ -50,7 +53,7 @@ class Categories(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Categories'
+        verbose_name_plural = 'Entry Categories'
 
 
 class SizeCategories(models.Model):
@@ -61,7 +64,7 @@ class SizeCategories(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Size Categories'
+        verbose_name_plural = 'Entry Size Categories'
 
 
 class Sizes(models.Model):
@@ -74,7 +77,7 @@ class Sizes(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Sizes'
+        verbose_name_plural = 'Entry Sizes'
 
 
 class Brands(models.Model):
@@ -85,7 +88,7 @@ class Brands(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Brands'
+        verbose_name_plural = 'Entry Brands'
 
 
 class Products(models.Model):
@@ -103,7 +106,7 @@ class Products(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Products'
+        verbose_name_plural = 'Entry Products'
 
 
 class Cart(models.Model):
@@ -117,6 +120,9 @@ class Cart(models.Model):
     def __str__(self):
         return str(self.user)
 
+    class Meta:
+        verbose_name_plural = 'Transaction Carts'
+
 
 class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
@@ -128,9 +134,13 @@ class Order(models.Model):
     updated_at = models.DateTimeField()
     gross_amount = models.IntegerField()
     status = models.CharField(max_length=50)
+    verified = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.product)
+
+    class Meta:
+        verbose_name_plural = 'Transaction Orders'
 
 
 class Payment(models.Model):
@@ -142,6 +152,9 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.payment_type
+
+    class Meta:
+        verbose_name_plural = 'Transaction Payments'
 
 
 class ProductPurchases(models.Model):
@@ -157,7 +170,7 @@ class ProductPurchases(models.Model):
         return str(self.product)
 
     class Meta:
-        verbose_name_plural = 'Product Purchases'
+        verbose_name_plural = 'Trans Product Purchases'
 
 
 class RefundProduct(models.Model):
@@ -168,6 +181,9 @@ class RefundProduct(models.Model):
 
     def __str__(self):
         return str(self.order)
+
+    class Meta:
+        verbose_name_plural = 'Trans Refund Product'
 
 
 class Shipment(models.Model):
@@ -184,3 +200,6 @@ class Shipment(models.Model):
 
     def __str__(self):
         return str(self.product_order)
+
+    class Meta:
+        verbose_name_plural = 'Transaction Shipments'
