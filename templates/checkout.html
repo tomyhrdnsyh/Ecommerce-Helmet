@@ -14,10 +14,13 @@
 							{% csrf_token %}
 							<div id="user-info">
 								<div class="form-field">
-									<input class="form-control" disabled required type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} name="name" placeholder="Name..">
+									<input class="form-control" required type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} name="name" placeholder="Name..">
 								</div>
 								<div class="form-field">
-									<input class="form-control" disabled required type="email" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} name="email" placeholder="Email..">
+									<input class="form-control" required type="text" {% if request.user.phone_number %} value="{{ request.user.phone_number }}" {% endif %} name="name" placeholder="Phone..">
+								</div>
+								<div class="form-field">
+									<input class="form-control" required type="email" {% if request.user.email %} value="{{ request.user.email }}" {% endif %} name="email" placeholder="Email..">
 								</div>
 							</div>
 

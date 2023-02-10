@@ -288,7 +288,7 @@ def pages(request):
 
             service = None
             description = None
-            cost = None
+            cost = 0
             etd = None
 
             if city_id:
@@ -331,7 +331,7 @@ def pages(request):
                     user=request.user,
                     unique_code=unique_code,
                     quantity=request.POST.getlist('product-qty')[i],
-                    gross_amount=price * qty,
+                    gross_amount=(price * qty) + cost,
                     updated_at=datetime.now(),
                     status='pending'
                 )
@@ -432,12 +432,21 @@ def pages(request):
                                                                                            )
         for item in unique_code:
             try:
+                api_client = midtransclient.CoreApi(
+                    is_production=False,
+                    server_key='SB-Mid-server-PWpPema0nMJ82yYKbWIoYvA2',
+                    client_key='SB-Mid-client-7OJDLb4f29FXBV4o'
+                )
+
+                # udpate total price
+                # status_response = api_client.transactions.status(item['unique_code'])
+                # update_order = Order.objects.get(order_id=item['order_id'])
+                # update_order.gross_amount = int(status_response.get('gross_amount'))
+                # update_order.save()
+                # end update
+
                 if item['status'] == 'pending':
-                    api_client = midtransclient.CoreApi(
-                        is_production=False,
-                        server_key='SB-Mid-server-PWpPema0nMJ82yYKbWIoYvA2',
-                        client_key='SB-Mid-client-7OJDLb4f29FXBV4o'
-                    )
+
                     status_response = api_client.transactions.status(item['unique_code'])
 
                     # update status base on midtrans

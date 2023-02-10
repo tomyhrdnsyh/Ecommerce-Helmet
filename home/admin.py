@@ -90,12 +90,16 @@ class CartAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("order_id", "user", "get_alamat", "product", "quantity",
-                    "created_at", "updated_at", "gross_amount", "status", "verified")
+    list_display = ("order_id", "user", "get_alamat", "get_phone", "product", "quantity",
+                    "created_at", "gross_amount", "status", "verified")
 
     @admin.display(ordering='user__user_id', description='Address')
     def get_alamat(self, obj):
         return f"{obj.user.address}, {obj.user.city}, {obj.user.province}"
+
+    @admin.display(ordering='user__phone_number', description='Phone')
+    def get_phone(self, obj):
+        return f"{obj.user.phone_number}"
 
     def has_add_permission(self, request, obj=None):
         return False
