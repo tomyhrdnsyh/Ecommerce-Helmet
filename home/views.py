@@ -390,6 +390,7 @@ def pages(request):
                                                                                            'order_id',
                                                                                            'product__name', 'quantity',
                                                                                            'gross_amount',
+                                                                                           'payment__gross_amount',
                                                                                            'product__image',
                                                                                            'product__price',
                                                                                            'product__brand__name',
@@ -459,7 +460,6 @@ def pages(request):
             except Exception as e:
                 err = e
 
-        print(testing)
         for item in unique_code:
 
             unique = item['unique_code']

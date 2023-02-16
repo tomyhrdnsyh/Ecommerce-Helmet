@@ -11,10 +11,11 @@ from datetime import date
 def update_user_activated():
     user = CustomUser.objects.all()
     for item in user:
-        last_login = date.today() - item.last_login.date()
-        if last_login.days > 7:
-            item.is_active = False
-            item.save()
+        if item.last_login is not None:
+            last_login = date.today() - item.last_login.date()
+            if last_login.days > 7:
+                item.is_active = False
+                item.save()
 
 
 def login_view(request):

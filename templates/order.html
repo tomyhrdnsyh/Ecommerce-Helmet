@@ -84,7 +84,8 @@
                       <div class="card-footer">
                         <div class="row align-items-center">
                             <div class="col-8 col-lg-9 d-grid">
-                                <strong>Total <b>Rp. {{ item.gross_amount }}</b></strong>
+                                <strong>Total <b>Rp. {% if item.payment__gross_amount is not None  %}
+                                    {{ item.payment__gross_amount }} {% else %} {{ item.gross_amount }} {% endif %}</b></strong>
                             </div>
                             <form method="POST" class="col-4 col-lg-3 d-grid">
                                 {% csrf_token %}
