@@ -30,23 +30,23 @@
                             </tr>
                             <tr>
                                 <td>Product</td>
-                                <td id="product_name">{{ profile_detail.product__name }}</td>
+                                <td id="product_name">{% for i in profile_detail.object %} {{ i.product__name }}, {% endfor %}</td>
                             </tr>
                             <tr>
                                 <td>Brand</td>
-                                <td id="brand_name">{{ profile_detail.product__brand__name }}</td>
+                                <td id="brand_name">{% for i in profile_detail.object %} {{ i.product__brand__name }}, {% endfor %}</td>
                             </tr>
                             <tr>
                                 <td>Type</td>
-                                <td id="category_name">{{ profile_detail.product__category__name }}</td>
+                                <td id="category_name">{% for i in profile_detail.object %} {{ i.product__category__name }}, {% endfor %}</td>
                             </tr>
                             <tr>
                                 <td>Items</td>
-                                <td id="items">{{ profile_detail.quantity }} Items</td>
+                                <td id="items">{% for i in profile_detail.object %} {{ i.quantity }}, {% endfor %} Items</td>
                             </tr>
                             <tr>
                                 <td>Price</td>
-                                <td id="price">{{ profile_detail.product__price }}</td>
+                                <td id="price">{% for i in profile_detail.object %} {{ i.product__price }}, {% endfor %} </td>
                             </tr>
                             <tr>
                                 <td>Service</td>
@@ -62,15 +62,15 @@
                             </tr>
                             <tr>
                                 <td>Address</td>
-                                <td id="address">{{ profile_detail.shipment__city__address }}</td>
+                                <td id="address">{{ profile_detail.shipment__city }}</td>
                             </tr>
                             <tr>
                                 <td>Transaction Time</td>
-                                <td id="transaction_time">{{ profile_detail.transaction_time }}</td>
+                                <td id="transaction_time">{{ profile_detail.payment__transaction_time }}</td>
                             </tr>
                             <tr>
                                 <td>Payment Type</td>
-                                <td id="payment_type">{{ profile_detail.payment_type }}</td>
+                                <td id="payment_type">{{ profile_detail.payment__payment_type }}</td>
                             </tr>
                             <tr>
                                 <td>Status</td>

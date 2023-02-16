@@ -1,6 +1,7 @@
 import os.path
 import re
 
+import pandas as pd
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -316,7 +317,7 @@ def pages(request):
                     user=request.user,
                     unique_code=unique_code,
                     quantity=request.POST.getlist('product-qty')[i],
-                    gross_amount=(price * qty) + cost,
+                    gross_amount=(price * qty),
                     status='pending'
                 )
                 save_order.save()
@@ -410,10 +411,14 @@ def pages(request):
 
             testing[item['unique_code']].append(
                 {
+                    'order_id': item['order_id'],
+                    'product__brand__name': item['product__brand__name'],
+                    'product__category__name': item['product__category__name'],
                     'product__image': item['product__image'],
                     'product__name': item['product__name'],
                     'product__size__name': item['product__size__name'],
-                    'quantity': item['quantity']
+                    'quantity': item['quantity'],
+                    'product__price': item['product__price'],
                 }
             )
 
@@ -465,9 +470,13 @@ def pages(request):
             unique = item['unique_code']
             item['object'] = testing[unique]
 
-        # print(unique_code)
+        df_unique_code = pd.DataFrame(unique_code)
+        df_unique_code.drop_duplicates(subset='unique_code', inplace=True)
+        df_unique_code.fillna(" ", inplace=True)
 
-        context['profile_detail'] = unique_code
+        custom_unique_code = df_unique_code.to_dict(orient='records')
+
+        context['profile_detail'] = custom_unique_code
 
         context['filter'] = set([item['status'] for item in unique_code])
 
@@ -479,7 +488,8 @@ def pages(request):
             load_template = f'report/cetak_laporan_customer.html'
             id_order = request.GET.get('exportPDF')
             data = None
-            for item in unique_code:
+
+            for item in custom_unique_code:
                 if item.get('unique_code') == id_order:
                     data = item
 
@@ -501,23 +511,29 @@ def pages(request):
         if 'refund' in request.POST:
             unique_code = request.POST.get('id_refund')
 
-            data_harga = request.POST.get('price_refund')
-            price = re.sub(r',|\.', '', data_harga)
+            # data_harga = request.POST.get('price_refund')
+            # price = re.sub(r',|\.', '', data_harga)
             reason = request.POST.get('reason')
 
             try:
-                order = Order.objects.get(unique_code=unique_code)
-                refund = RefundProduct(
-                    order=order,
-                    price=price,
-                    reason=reason,
-                )
+                order = Order.objects.filter(unique_code=unique_code).values('order_id',
+                                                                             'product__price')
+
             except Exception as e:
                 err = e
+                print(err)
             else:
-                refund.save()
-                order.status = 'refunded'
-                order.save()
+                for item in order:
+                    obj_order = Order.objects.get(order_id=item['order_id'])
+                    refund = RefundProduct(
+                        order=obj_order,
+                        price=item['product__price'],
+                        reason=reason,
+                    )
+                    refund.save()
+                    obj_order.status = 'refunded'
+                    obj_order.save()
+
                 link = request.build_absolute_uri('/contact.html')
                 msg = "Produk bisa dikembalikan langsung pada toko Pritohelmet. " \
                       f"<a href='{link}'>Detail alamat</a>"

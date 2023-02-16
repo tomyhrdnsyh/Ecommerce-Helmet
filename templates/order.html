@@ -64,27 +64,30 @@
                                     <img class="img-fluid" src="{{ i.product__image }}" alt="{{ i.product__name }}" id="product-detail">
                                 </div>
                                 <div class="col-9">
-                                    <h5 id="{{item.unique_code}}-product__name" class="card-title">{{ i.product__name }}</h5>
+                                    <h5 id="{{ item.unique_code }}-product_name_single" class="card-title">{{ i.product__name }}</h5>
                                     <p class="card-subtitle mb-0 mb-lg-2 text-muted">Size {{ i.product__size__name }}</p>
                                     <p id="{{item.unique_code}}-quantity" class="card-subtitle mb-0 mb-lg-2 text-muted">{{ i.quantity }} Items</p>
                                 </div>
                             </div>
                       </div>
                       {% endfor %}
+
                       <input type="hidden" id="{{item.unique_code}}-short_unique_code" value="ID-{{ item.order_id }}">
-                                    <input type="hidden" id="{{item.unique_code}}-product__brand__name" value="{{ item.product__brand__name }}">
-                                    <input type="hidden" id="{{item.unique_code}}-product__category__name" value="{{ item.product__category__name }}">
-                                    <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.payment__transaction_time }}">
-                                    <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
-                                    <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment__payment_type }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__service" value="{{ item.shipment__service }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__cost" value="{{ item.shipment__cost }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__etd" value="{{ item.shipment__etd }}">
+                      <input type="hidden" id="{{item.unique_code}}-product__name" value="{% for i in item.object %} {{ i.product__name }}, {% endfor %}">
+                      <input type="hidden" id="{{item.unique_code}}-product__brand__name" value="{% for i in item.object %} {{ i.product__brand__name }}, {% endfor %}">
+                      <input type="hidden" id="{{item.unique_code}}-product__category__name" value="{% for i in item.object %} {{ i.product__category__name }},  {% endfor %}">
+                      <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.payment__transaction_time }}">
+                      <input type="hidden" id="{{item.unique_code}}-product__price" value="{% for i in item.object %} {{ i.product__price }}, {% endfor %}">
+                      <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment__payment_type }}">
+                      <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city }}">
+                      <input type="hidden" id="{{item.unique_code}}-shipment__service" value="{{ item.shipment__service }}">
+                      <input type="hidden" id="{{item.unique_code}}-shipment__cost" value="{{ item.shipment__cost }}">
+                      <input type="hidden" id="{{item.unique_code}}-shipment__etd" value="{{ item.shipment__etd }}">
+
                       <div class="card-footer">
                         <div class="row align-items-center">
                             <div class="col-8 col-lg-9 d-grid">
-                                <strong>Total <b>Rp. {% if item.payment__gross_amount is not None  %}
+                                <strong>Total <b>Rp. {% if item.payment__gross_amount != " "  %}
                                     {{ item.payment__gross_amount }} {% else %} {{ item.gross_amount }} {% endif %}</b></strong>
                             </div>
                             <form method="POST" class="col-4 col-lg-3 d-grid">
@@ -233,7 +236,8 @@ function consumeData(id) {
     short_unique_code = document.getElementById(id+"-short_unique_code").value;
     product__brand__name = document.getElementById(id+"-product__brand__name").value;
     status_text = document.getElementById(id+"-status").innerText;
-    product_name = document.getElementById(id+"-product__name").innerText;
+    product_name = document.getElementById(id+"-product__name").value;
+    product_name_single = document.getElementById(id+"-product_name_single").innerText;
     quantity = document.getElementById(id+"-quantity").innerText;
     product__category__name = document.getElementById(id+"-product__category__name").value;
     transaction_time = document.getElementById(id+"-transaction_time").value;
@@ -246,7 +250,7 @@ function consumeData(id) {
 
 
     document.getElementById("export_order_id").value = id;
-    document.getElementById("buy_again_product").value = product_name;
+    document.getElementById("buy_again_product").value = product_name_single;
     document.getElementById('order_id').innerHTML = short_unique_code;
     // document.getElementById('full_name').innerHTML ="{{ request.user.usename }}";
     document.getElementById('product_name').innerHTML = product_name;
