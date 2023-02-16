@@ -57,28 +57,30 @@
                                 </div>
                             </div>
                         </div>
+                      {% for i in item.object %}
                       <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-3 col-lg-1">
-                                    <img class="img-fluid" src="{{ item.product__image }}" alt="{{ item.product__name }}" id="product-detail">
+                                    <img class="img-fluid" src="{{ i.product__image }}" alt="{{ i.product__name }}" id="product-detail">
                                 </div>
                                 <div class="col-9">
-                                    <h5 id="{{item.unique_code}}-product__name" class="card-title">{{ item.product__name }}</h5>
-                                    <p class="card-subtitle mb-0 mb-lg-2 text-muted">Size {{ item.product__size__name }}</p>
-                                    <p id="{{item.unique_code}}-quantity" class="card-subtitle mb-0 mb-lg-2 text-muted">{{ item.quantity }} Items</p>
-                                    <input type="hidden" id="{{item.unique_code}}-short_unique_code" value="ID-{{ item.order_id }}">
+                                    <h5 id="{{item.unique_code}}-product__name" class="card-title">{{ i.product__name }}</h5>
+                                    <p class="card-subtitle mb-0 mb-lg-2 text-muted">Size {{ i.product__size__name }}</p>
+                                    <p id="{{item.unique_code}}-quantity" class="card-subtitle mb-0 mb-lg-2 text-muted">{{ i.quantity }} Items</p>
+                                </div>
+                            </div>
+                      </div>
+                      {% endfor %}
+                      <input type="hidden" id="{{item.unique_code}}-short_unique_code" value="ID-{{ item.order_id }}">
                                     <input type="hidden" id="{{item.unique_code}}-product__brand__name" value="{{ item.product__brand__name }}">
                                     <input type="hidden" id="{{item.unique_code}}-product__category__name" value="{{ item.product__category__name }}">
                                     <input type="hidden" id="{{item.unique_code}}-transaction_time" value="{{ item.payment__transaction_time }}">
                                     <input type="hidden" id="{{item.unique_code}}-product__price" value="{{ item.product__price }}">
                                     <input type="hidden" id="{{item.unique_code}}-payment_type" value="{{ item.payment__payment_type }}">
-                                    <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city__address }}">
+                                    <input type="hidden" id="{{item.unique_code}}-shipment__city__address" value="{{ item.shipment__city }}">
                                     <input type="hidden" id="{{item.unique_code}}-shipment__service" value="{{ item.shipment__service }}">
                                     <input type="hidden" id="{{item.unique_code}}-shipment__cost" value="{{ item.shipment__cost }}">
                                     <input type="hidden" id="{{item.unique_code}}-shipment__etd" value="{{ item.shipment__etd }}">
-                                </div>
-                            </div>
-                      </div>
                       <div class="card-footer">
                         <div class="row align-items-center">
                             <div class="col-8 col-lg-9 d-grid">

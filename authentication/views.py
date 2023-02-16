@@ -4,12 +4,26 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm
+from home.models import CustomUser
+from datetime import date
+
+
+def update_user_activated():
+    user = CustomUser.objects.all()
+    for item in user:
+        last_login = date.today() - item.last_login.date()
+        if last_login.days > 7:
+            item.is_active = False
+            item.save()
 
 
 def login_view(request):
     form = LoginForm(request.POST or None)
 
     msg = None
+
+    # update status user active nonactive
+    update_user_activated()
 
     if request.method == "POST":
 
@@ -21,7 +35,7 @@ def login_view(request):
                 login(request, user)
                 return redirect("/")
             else:
-                msg = 'Invalid credentials'
+                msg = 'Invalid credentials or account is nonactive'
         else:
             msg = 'Error validating the form'
 

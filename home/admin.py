@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from .models import *
+from django.template import loader
+from django.http import HttpResponse
 # Register your models here.
 
 
@@ -26,21 +28,10 @@ class CustomUserAdmin(UserAdmin):
             }
         )
     )
-    list_display = ('user_id', 'full_name', 'phone_number', 'email')
+    list_display = ('user_id', 'first_name', 'last_name', 'full_name', 'phone_number', 'email', 'is_active')
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
-
-
-@admin.register(Province)
-class ProvinceAdmin(admin.ModelAdmin):
-    list_display = ("province_id", "province_name")
-
-
-@admin.register(Cities)
-class CitiesAdmin(admin.ModelAdmin):
-    list_display = ("city_id", "province", "address", "city_name",
-                    "postal_code")
 
 
 @admin.register(Shipment)
@@ -88,10 +79,36 @@ class CartAdmin(admin.ModelAdmin):
         return False
 
 
+def export_report(queryset):
+    order = []
+    for item in queryset:
+
+        try:
+            payment = Payment.objects.get(order=item.order_id)
+        except Payment.DoesNotExist:
+            payment = '-'
+
+        order.append(
+            {
+                'order_id': item.order_id,
+                'product__name': item.product,
+                'user__username': item.user.full_name,
+                'quantity': item.quantity,
+                'payment__transaction_time': payment.transaction_time if not isinstance(payment, str) else payment,
+                'gross_amount': item.gross_amount,
+                'payment__payment_type': payment.payment_type if not isinstance(payment, str) else payment,
+                'status': item.status
+            }
+        )
+    return order
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("order_id", "user", "get_alamat", "get_phone", "product", "quantity",
                     "created_at", "gross_amount", "status", "verified")
+
+    search_fields = ['created_at']
 
     @admin.display(ordering='user__user_id', description='Address')
     def get_alamat(self, obj):
@@ -103,6 +120,38 @@ class OrderAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+    actions = ['export_pdf', 'export_excel']
+
+    def export_pdf(self, request, queryset):
+        context = {}
+        order = export_report(queryset)
+
+        load_template = 'report/cetak-laporan-penjualan.html'
+
+        context['order'] = order
+        context['segment'] = load_template
+
+        html_template = loader.get_template(load_template)
+
+        return HttpResponse(html_template.render(context, request))
+
+    export_pdf.short_description = "Cetak PDF Order yang dipilih"
+
+    def export_excel(self, request, queryset):
+        context = {}
+        order = export_report(queryset)
+
+        load_template = 'report/export-excel.html'
+
+        context['order'] = order
+        context['segment'] = load_template
+
+        html_template = loader.get_template(load_template)
+
+        return HttpResponse(html_template.render(context, request))
+
+    export_excel.short_description = "Cetak Excel Order yang dipilih"
 
 
 @admin.register(Payment)

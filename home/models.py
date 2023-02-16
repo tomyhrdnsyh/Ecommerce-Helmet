@@ -20,31 +20,6 @@ class CustomUser(AbstractUser):
         db_table = 'Users'
 
 
-class Province(models.Model):
-    province_id = models.AutoField(primary_key=True)
-    province_name = models.CharField(max_length=100, null=True)
-
-    def __str__(self):
-        return self.province_name
-
-    class Meta:
-        verbose_name_plural = 'Transaction Provinces'
-
-
-class Cities(models.Model):
-    city_id = models.AutoField(primary_key=True)
-    city_name = models.CharField(max_length=100, null=True)
-    postal_code = models.CharField(max_length=15, null=True)
-    province = models.ForeignKey(Province, on_delete=models.CASCADE)
-    address = models.CharField(max_length=50, null=True)
-
-    def __str__(self):
-        return self.city_name
-
-    class Meta:
-        verbose_name_plural = 'Transaction Cities'
-
-
 class Categories(models.Model):
     category_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -131,7 +106,6 @@ class Order(models.Model):
     quantity = models.IntegerField(null=True)
     unique_code = models.CharField(max_length=250)
     created_at = models.DateTimeField(editable=False, auto_now_add=True)
-    updated_at = models.DateTimeField()
     gross_amount = models.IntegerField()
     status = models.CharField(max_length=50)
     verified = models.BooleanField(default=False)
@@ -189,8 +163,7 @@ class RefundProduct(models.Model):
 class Shipment(models.Model):
     shipment_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    city = models.ForeignKey(Cities, on_delete=models.SET_NULL,
-                             null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
     product_order = models.ForeignKey(Order, on_delete=models.CASCADE,
                                       null=True)
     service = models.CharField(max_length=100, null=True, blank=True)

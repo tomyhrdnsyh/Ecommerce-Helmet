@@ -30,6 +30,16 @@
 
                                   <div class="input-container">
                                     <i class="fa fa-user icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.first_name %} value="{{ request.user.first_name }}" {% endif %} placeholder="First name" name="first_name">
+                                  </div>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-user icon"></i>
+                                    <input class="input-field" type="text" {% if request.user.last_name %} value="{{ request.user.last_name }}" {% endif %} placeholder="Last name" name="last_name">
+                                  </div>
+
+                                  <div class="input-container">
+                                    <i class="fa fa-user icon"></i>
                                     <input class="input-field" type="text" {% if request.user.full_name %} value="{{ request.user.full_name }}" {% endif %} placeholder="Full name" name="full_name">
                                   </div>
 

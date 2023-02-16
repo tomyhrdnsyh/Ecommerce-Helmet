@@ -80,21 +80,6 @@ def pages(request):
     if load_template == 'admin':
         return HttpResponseRedirect(reverse('admin:index'))
 
-    if load_template in ['cetak-laporan-penjualan.html', 'export-excel.html']:
-        load_template = f'report/{load_template}'
-
-        order = Order.objects.filter(Q(status='refunded') | Q(status='settlement')).values('order_id', 'product__name',
-                                                                                           'user__username', 'quantity',
-                                                                                           'payment__transaction_time',
-                                                                                           'gross_amount',
-                                                                                           'payment__payment_type',
-                                                                                           'status')
-
-        context['order'] = order
-        context['segment'] = load_template
-        html_template = loader.get_template(load_template)
-        return HttpResponse(html_template.render(context, request))
-
     # total product in cart
     context['total_in_cart'] = total_product_in_cart(request)
     context['total_in_profile'] = total_product_buy(request)
@@ -332,7 +317,6 @@ def pages(request):
                     unique_code=unique_code,
                     quantity=request.POST.getlist('product-qty')[i],
                     gross_amount=(price * qty) + cost,
-                    updated_at=datetime.now(),
                     status='pending'
                 )
                 save_order.save()
@@ -343,23 +327,10 @@ def pages(request):
                 product.save()
                 # ------------ end update stock product ------------
 
-                # ------------ save to Province and Cities model ------------
-                province_obj, created = Province.objects.get_or_create(
-                    province_name=request.POST.get('province')
-                )
-
-                cities_obj, created = Cities.objects.get_or_create(
-                    city_name=request.POST.get('city'),
-                    postal_code=request.POST.get('zipcode'),
-                    address=request.POST.get('address'),
-                    province=province_obj
-                )
-                # ------------ end Province and Cities ------------
-
                 # ------------ save to Shipment model ------------
                 Shipment.objects.create(
                     user=request.user,
-                    city=cities_obj,
+                    city=request.POST.get('city'),
                     product_order=save_order,
                     service=service,
                     description=description,
@@ -390,6 +361,8 @@ def pages(request):
             info_user = CustomUser.objects.get(username=request.user)
             data = request.POST
 
+            info_user.first_name = data.get('first_name')
+            info_user.last_name = data.get('last_name')
             info_user.full_name = data.get('full_name')
             info_user.phone_number = data.get('phone_number')
             info_user.email = data.get('email')
@@ -423,14 +396,26 @@ def pages(request):
                                                                                            'status',
                                                                                            'product__size__name',
                                                                                            'product__category__name',
-                                                                                           'shipment__city__address',
+                                                                                           'shipment__city',
                                                                                            'shipment__service',
                                                                                            'shipment__cost',
                                                                                            'shipment__etd',
                                                                                            'payment__transaction_time',
                                                                                            'payment__payment_type',
                                                                                            )
+
+        testing = defaultdict(list)
         for item in unique_code:
+
+            testing[item['unique_code']].append(
+                {
+                    'product__image': item['product__image'],
+                    'product__name': item['product__name'],
+                    'product__size__name': item['product__size__name'],
+                    'quantity': item['quantity']
+                }
+            )
+
             try:
                 api_client = midtransclient.CoreApi(
                     is_production=False,
@@ -469,8 +454,18 @@ def pages(request):
                     item['transaction_time'] = status_response['transaction_time']
                     item['payment_type'] = status_response['payment_type']
                     item['product__price'] = f"{int(item['product__price']):,}"
+
+
             except Exception as e:
                 err = e
+
+        print(testing)
+        for item in unique_code:
+
+            unique = item['unique_code']
+            item['object'] = testing[unique]
+
+        # print(unique_code)
 
         context['profile_detail'] = unique_code
 
