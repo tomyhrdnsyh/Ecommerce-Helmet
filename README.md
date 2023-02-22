@@ -1,5 +1,5 @@
 # Ecommerce-Helmet
-Project Akhir Yovie E-comerce Helm
+Freelance Project E-Comerce Helm
 
 ![Homepage](https://user-images.githubusercontent.com/58851621/220563587-20e70a18-3d5b-46dd-8055-08a8687181e2.png)
 ![About Us](https://user-images.githubusercontent.com/58851621/220563646-1316c53b-ce93-4c83-a2af-16428b4678a9.png)
